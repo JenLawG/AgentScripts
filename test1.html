@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Williams-Sonoma – Customer Service Script</title>
+
+<style>
+  :root {
+    --primary: #2c5234;
+    --primary-light: #e8f0ea;
+    --accent: #8b4513;
+    --bg: #faf9f7;
+    --card-bg: #ffffff;
+    --text-main: #2c2c2c;
+    --text-muted: #6b6b6b;
+    --radius: 8px;
+    --shadow: 0 2px 12px rgba(44, 82, 52, 0.1);
+    --gold: #b8860b;
+    --gold-light: #fdf8e8;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-main);
+    padding: 20px 16px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: auto;
+  }
+
+  .header {
+    background: var(--primary);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  /* -------------------- TABS --------------------- */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 2px solid #d4cfc5;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: color 0.25s ease, border-bottom 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+  }
+
+  /* ------------------- CARDS -------------------- */
+  .card {
+    background: var(--card-bg);
+    padding: 24px;
+    margin-bottom: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid #e8e4de;
+  }
+
+  h3 {
+    margin-top: 0;
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d4cfc5;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    background: #fefefe;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 700px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  /* ---------------- CHECKBOXES ------------------ */
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    padding: 8px 0;
+  }
+
+  .check-item input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--primary);
+  }
+
+  /* ---------------- ACTION BUTTONS -------------- */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    padding: 14px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary { 
+    background: var(--primary); 
+    color: #fff; 
+  }
+  .btn-primary:hover { 
+    background: #1f3a24; 
+  }
+
+  .btn-accent { 
+    background: var(--accent); 
+    color: #fff; 
+  }
+  .btn-accent:hover { 
+    background: #6f3610; 
+  }
+
+  /* ---------------- REWARDS BADGE -------------- */
+  .rewards-badge {
+    background: var(--gold-light);
+    border: 2px solid var(--gold);
+    padding: 16px;
+    border-radius: var(--radius);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .rewards-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 8px 0;
+  }
+
+  .rewards-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---------------- SUPERVISOR ACTION CARD -------------- */
+  .supervisor-card {
+    background: #fef5e7;
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px;
+    margin-top: 8px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: none;
+  }
+
+  .supervisor-option {
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+
+  .supervisor-option:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  /* ---------------- TIMELINE -------------------- */
+  .timeline {
+    border-left: 3px solid var(--primary);
+    padding-left: 18px;
+  }
+  .event { margin-bottom: 18px; }
+  .event .date { 
+    font-size: 0.8rem; 
+    font-weight: 600; 
+    color: var(--primary); 
+  }
+  .event .type {
+    font-size: 0.75rem;
+    background: var(--primary-light);
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin: 4px 0;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .event .summary { 
+    font-size: 0.9rem; 
+    color: var(--text-muted); 
+    line-height: 1.5;
+  }
+
+  /* ---------------- TOASTS -------------------- */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+  }
+  .toast {
+    background: var(--primary);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* -------------- TAB CONTENT ------------------- */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* -------------- ORDER TABLE ------------------- */
+  .order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  .order-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e8e4de;
+  }
+  .order-table tr:last-child td {
+    border-bottom: none;
+  }
+  .order-table td:first-child {
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 35%;
+  }
+
+</style>
+</head>
+
+<body>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+
+  <div class="header">Williams-Sonoma Customer Service</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="customer">Customer Profile</div>
+    <div class="tab" data-tab="workflow">Service Workflow</div>
+    <div class="tab" data-tab="order">Order Details</div>
+    <div class="tab" data-tab="history">Contact History</div>
+    <div class="tab" data-tab="rewards">Rewards Program</div>
+  </div>
+
+  <!-- ---------------- TAB: CUSTOMER PROFILE ---------------- -->
+  <div id="customer" class="tab-content active">
+    <div class="card">
+      <h3>Customer Profile</h3>
+
+      <div class="grid-2">
+        <div><label>First Name</label><input id="firstName" readonly></div>
+        <div><label>Last Name</label><input id="lastName" readonly></div>
+
+        <div><label>Phone Number</label><input id="phoneNumber" readonly></div>
+        <div><label>Order Number</label><input id="orderNumber" readonly></div>
+
+        <div style="grid-column: 1 / -1;">
+          <label>Delivery Address</label>
+          <input id="deliveryAddress" readonly>
+        </div>
+
+        <div><label>Delivery Date</label><input id="deliveryDate" readonly></div>
+        <div>
+          <label>Rewards Balance</label>
+          <input id="rewardsBalance" readonly>
+          
+          <div class="rewards-badge">
+            <div class="rewards-label">Available Rewards</div>
+            <div class="rewards-amount" id="rewardsDisplay">$0.00</div>
+            <div class="rewards-label">Can be applied to current order</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------- TAB: WORKFLOW ---------------- -->
+  <div id="workflow" class="tab-content">
+    <div class="card">
+      <h3>Customer Service Workflow</h3>
+
+      <div class="check-item"><input type="checkbox">Verify customer identity (name + phone or order number)</div>
+      <div class="check-item"><input type="checkbox">Confirm order details and delivery date</div>
+      <div class="check-item"><input type="checkbox">Address customer inquiry or concern</div>
+      <div class="check-item"><input type="checkbox">Review rewards balance and redemption options</div>
+      <div class="check-item"><input type="checkbox">Offer additional assistance or product recommendations</div>
+      <div class="check-item"><input type="checkbox">Document interaction notes in system</div>
+
+      <div class="actions">
+        <button class="btn btn-accent" onclick="toggleSupervisorCard()">Escalate to Supervisor</button>
+
+        <div id="supervisorCard" class="supervisor-card">
+          <div class="supervisor-option">Notify Supervisor Immediately</div>
+          <div class="supervisor-option">Request Live Call Monitoring</div>
+          <div class="supervisor-option">Flag for Quality Review</div>
+          <div class="supervisor-option">Transfer to Supervisor Queue</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------- TAB: ORDER DETAILS ---------------- -->
+  <div id="order" class="tab-content">
+    <div class="card">
+      <h3>Order Information</h3>
+
+      <table class="order-table">
+        <tr><td>Order Number:</td><td id="orderNumDetail">—</td></tr>
+        <tr><td>Order Date:</td><td>January 15, 2026</td></tr>
+        <tr><td>Order Status:</td><td>In Transit</td></tr>
+        <tr><td>Delivery Date:</td><td id="deliveryDateDetail">—</td></tr>
+        <tr><td>Shipping Method:</td><td>Standard Ground (5-7 business days)</td></tr>
+        <tr><td>Tracking Number:</td><td>1Z999AA10123456784</td></tr>
+        <tr><td>Order Total:</td><td>$342.50</td></tr>
+        <tr><td>Payment Method:</td><td>Visa •••• 4242</td></tr>
+      </table>
+
+      <div class="actions">
+        <button class="btn btn-primary">View Full Order History</button>
+        <button class="btn btn-primary">Process Return/Exchange</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------- TAB: CONTACT HISTORY ---------------- -->
+  <div id="history" class="tab-content">
+    <div class="card">
+      <h3>Contact History</h3>
+
+      <div class="timeline">
+        <div class="event">
+          <div class="date">January 22, 2026</div>
+          <div class="type">Email</div>
+          <div class="summary">Shipping confirmation sent with tracking information.</div>
+        </div>
+        <div class="event">
+          <div class="date">January 20, 2026</div>
+          <div class="type">SMS</div>
+          <div class="summary">Order processing notification sent.</div>
+        </div>
+        <div class="event">
+          <div class="date">January 18, 2026</div>
+          <div class="type">Inbound Call</div>
+          <div class="summary">Customer inquired about delivery timeframe. Confirmed estimated delivery date.</div>
+        </div>
+        <div class="event">
+          <div class="date">January 15, 2026</div>
+          <div class="type">Email</div>
+          <div class="summary">Order confirmation sent. Applied $25 rewards to purchase.</div>
+        </div>
+        <div class="event">
+          <div class="date">January 10, 2026</div>
+          <div class="type">Outbound Call</div>
+          <div class="summary">Special promotion notification. Customer expressed interest in cookware collection.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------- TAB: REWARDS PROGRAM ---------------- -->
+  <div id="rewards" class="tab-content">
+    <div class="card">
+      <h3>Rewards Program Details</h3>
+
+      <table class="order-table">
+        <tr><td>Membership Status:</td><td>Gold Member</td></tr>
+        <tr><td>Member Since:</td><td>March 2019</td></tr>
+        <tr><td>Current Balance:</td><td id="rewardsBalanceDetail">—</td></tr>
+        <tr><td>Points Earned YTD:</td><td>1,250 points</td></tr>
+        <tr><td>Lifetime Points:</td><td>8,450 points</td></tr>
+        <tr><td>Tier Benefits:</td><td>Free shipping, Early access to sales, Birthday reward</td></tr>
+        <tr><td>Next Tier:</td><td>Platinum (500 points away)</td></tr>
+      </table>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="showToast('Rewards applied to current order')">Apply Rewards to Order</button>
+        <button class="btn btn-primary" onclick="showToast('Rewards information sent via email')">Email Rewards Summary</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ------------------------ SCRIPT ------------------------- -->
+<script>
+  /* ----- Tabs ----- */
+  const tabs = document.querySelectorAll(".tab");
+  const contents = document.querySelectorAll(".tab-content");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      contents.forEach(c => c.classList.remove("active"));
+      document.getElementById(tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ----- Query Params ----- */
+  const qp = new URLSearchParams(window.location.search);
+
+  function getQP(...keys) {
+    for (let k of keys) {
+      const v = qp.get(k);
+      if (v && v.trim() !== "") return v;
+    }
+    return "";
+  }
+
+  function cleanPhone(input="") {
+    return input.replace(/[\[\]\(\)]/g,"").trim();
+  }
+
+  /* ----- Defaults ----- */
+  const defaults = {
+    firstName: "Sarah",
+    lastName: "Mitchell",
+    phoneNumber: "(415) 555-0198",
+    orderNumber: "WS-2026-187452",
+    deliveryAddress: "742 Evergreen Terrace, San Francisco, CA 94102",
+    deliveryDate: "January 28, 2026",
+    rewardsBalance: "$47.50"
+  };
+
+  function setField(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+
+  /* ----- Field Mapping ----- */
+  const firstName = getQP("firstname","FirstName","fname","FNAME") || defaults.firstName;
+  const lastName = getQP("lastname","LastName","lname","LNAME") || defaults.lastName;
+  const phoneNumber = cleanPhone(getQP("phone","PHONE","PhoneNumber","Mobile")) || defaults.phoneNumber;
+  const orderNumber = getQP("ordernumber","OrderNumber","order","ORDER") || defaults.orderNumber;
+  const deliveryAddress = getQP("address","Address","deliveryaddress","DeliveryAddress") || defaults.deliveryAddress;
+  const deliveryDate = getQP("deliverydate","DeliveryDate","delivery","DELIVERY") || defaults.deliveryDate;
+  const rewardsBalance = getQP("rewards","RewardsBalance","balance","BALANCE") || defaults.rewardsBalance;
+
+  setField("firstName", firstName);
+  setField("lastName", lastName);
+  setField("phoneNumber", phoneNumber);
+  setField("orderNumber", orderNumber);
+  setField("deliveryAddress", deliveryAddress);
+  setField("deliveryDate", deliveryDate);
+  setField("rewardsBalance", rewardsBalance);
+
+  /* ----- Populate Order Details Tab ----- */
+  document.getElementById("orderNumDetail").innerText = orderNumber;
+  document.getElementById("deliveryDateDetail").innerText = deliveryDate;
+  document.getElementById("rewardsBalanceDetail").innerText = rewardsBalance;
+
+  /* ----- Rewards Display Badge ----- */
+  document.getElementById("rewardsDisplay").innerText = rewardsBalance;
+
+  /* ----- Supervisor Action Card Toggle ----- */
+  function toggleSupervisorCard() {
+    const card = document.getElementById("supervisorCard");
+    card.style.display = (card.style.display === "block") ? "none" : "block";
+  }
+  window.toggleSupervisorCard = toggleSupervisorCard;
+
+  /* ----- Toast System ----- */
+  function showToast(text) {
+    const container = document.getElementById("toastContainer");
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = text + " ✓";
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add("show"), 10);
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+  window.showToast = showToast;
+
+  /* ----- Supervisor Option Clicks ----- */
+  document.querySelectorAll(".supervisor-option").forEach(option => {
+    option.addEventListener("click", () => {
+      const msg = option.innerText.trim();
+      document.getElementById("supervisorCard").style.display = "none";
+      showToast(msg);
+    });
+  });
+
+  /* ----- Theme Overrides from Genesys ----- */
+  const buttonColor = getQP("buttonColor","ButtonColor");
+  const bgColor = getQP("bgColor","PageBackgroundColor");
+  const headerColor = getQP("headerColor","HeaderColor");
+
+  if (bgColor) document.body.style.backgroundColor = bgColor;
+  if (headerColor) document.querySelector(".header").style.backgroundColor = headerColor;
+  if (buttonColor) {
+    document.querySelectorAll(".btn-primary").forEach(btn => {
+      btn.style.backgroundColor = buttonColor;
+    });
+  }
+</script>
+
+</body>
+</html>
