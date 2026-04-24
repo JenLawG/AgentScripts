@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayPal Merchant Onboarding | Genesys Cloud Agent Script</title>
+  <style>
+    :root {
+      --paypal-blue: #003087;
+      --paypal-light-blue: #0070e0;
+      --paypal-cyan: #00a8ea;
+      --paypal-navy: #001c64;
+      --paypal-bg: #f5f7fa;
+      --paypal-border: #d9e1ea;
+      --paypal-text: #1f2d3d;
+      --paypal-muted: #5b6b7a;
+      --success: #107c41;
+      --warning: #b25e09;
+      --danger: #b42318;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4fb 0%, var(--paypal-bg) 100%);
+      color: var(--paypal-text);
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--paypal-navy) 0%, var(--paypal-blue) 55%, var(--paypal-light-blue) 100%);
+      color: var(--white);
+      border-radius: 18px;
+      padding: 28px 32px;
+      box-shadow: 0 12px 30px rgba(0, 48, 135, 0.18);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #009cde 0%, #0070ba 55%, #003087 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -1px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.12);
+    }
+
+    .brand-title h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .brand-title p {
+      margin: 6px 0 0;
+      color: rgba(255,255,255,0.84);
+      font-size: 14px;
+    }
+
+    .status-pill {
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: block;
+      margin-top: 22px;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--paypal-border);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--paypal-border);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--paypal-blue);
+    }
+
+    .panel-header p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--paypal-muted);
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 18px;
+    }
+
+    .field,
+    .field-full {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field-full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--paypal-text);
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="file"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c6d0db;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--paypal-text);
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--paypal-light-blue);
+      box-shadow: 0 0 0 4px rgba(0, 112, 224, 0.12);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--paypal-border);
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .check-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--paypal-blue);
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    .check-row span {
+      font-size: 14px;
+      color: var(--paypal-text);
+      font-weight: 600;
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--paypal-muted);
+      margin-top: 2px;
+    }
+
+    .upload-box {
+      border: 1.5px dashed #9bb7d0;
+      border-radius: 16px;
+      padding: 18px;
+      background: linear-gradient(180deg, #fbfdff 0%, #f5faff 100%);
+    }
+
+    .upload-box strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--paypal-blue);
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      border: 1px solid var(--paypal-border);
+      border-radius: 14px;
+      padding: 14px 15px;
+      background: #fff;
+    }
+
+    .summary-list strong {
+      display: block;
+      font-size: 13px;
+      color: var(--paypal-blue);
+      margin-bottom: 4px;
+    }
+
+    .summary-list span {
+      font-size: 13px;
+      color: var(--paypal-muted);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .badge.blue {
+      background: rgba(0, 112, 224, 0.1);
+      color: var(--paypal-blue);
+      border-color: rgba(0, 112, 224, 0.18);
+    }
+
+    .badge.green {
+      background: rgba(16, 124, 65, 0.1);
+      color: var(--success);
+      border-color: rgba(16, 124, 65, 0.18);
+    }
+
+    .badge.gold {
+      background: rgba(178, 94, 9, 0.1);
+      color: var(--warning);
+      border-color: rgba(178, 94, 9, 0.18);
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: #edf3f8;
+      color: var(--paypal-blue);
+      border: 1px solid #d4e2ee;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--paypal-light-blue) 0%, var(--paypal-blue) 100%);
+      color: var(--white);
+      box-shadow: 0 8px 18px rgba(0, 48, 135, 0.16);
+    }
+
+    .script-note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f8fbff;
+      border: 1px solid #d8e8f8;
+      font-size: 13px;
+      color: var(--paypal-muted);
+    }
+
+    @media (max-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .page {
+        padding: 14px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        padding: 22px;
+      }
+
+      .brand-title h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="brand-lockup">
+        <div class="brand-icon">P</div>
+        <div class="brand-title">
+          <h1>PayPal Merchant Onboarding</h1>
+          <p>Genesys Cloud agent script for new merchant intake and verification</p>
+        </div>
+      </div>
+      <div class="status-pill">Agent Workflow: Merchant Setup</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Merchant Information Collection</h2>
+          <p>Capture business identity, ownership details, platform information, and verification checkpoints.</p>
+        </div>
+
+        <div class="panel-body">
+          <form>
+            <div class="form-grid">
+              <div class="field">
+                <label class="required" for="firstName">First Name</label>
+                <input id="firstName" name="firstName" type="text" placeholder="Enter first name" />
+              </div>
+
+              <div class="field">
+                <label class="required" for="lastName">Last Name</label>
+                <input id="lastName" name="lastName" type="text" placeholder="Enter last name" />
+              </div>
+
+              <div class="field-full">
+                <label class="required" for="businessEntity">Business Entity Name</label>
+                <input id="businessEntity" name="businessEntity" type="text" placeholder="Enter registered business entity name" />
+              </div>
+
+              <div class="field">
+                <label class="required" for="businessEmail">Business Email</label>
+                <input id="businessEmail" name="businessEmail" type="email" placeholder="merchant@business.com" />
+              </div>
+
+              <div class="field">
+                <label class="required" for="businessPhone">Business Phone Number</label>
+                <input id="businessPhone" name="businessPhone" type="tel" placeholder="(555) 555-5555" />
+              </div>
+
+              <div class="field-full">
+                <label class="required" for="businessAddress">Business Address</label>
+                <textarea id="businessAddress" name="businessAddress" placeholder="Street, city, state, ZIP/postal code"></textarea>
+              </div>
+
+              <div class="field">
+                <label class="required" for="businessType">Business Type</label>
+                <select id="businessType" name="businessType">
+                  <option value="">Select business type</option>
+                  <option>LLC</option>
+                  <option>Sole Proprietor</option>
+                  <option>Corporation</option>
+                  <option>Partnership</option>
+                  <option>Nonprofit</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="required" for="taxId">SSN / EIN</label>
+                <input id="taxId" name="taxId" type="text" placeholder="Enter SSN or EIN" />
+              </div>
+
+              <div class="field">
+                <label class="required" for="websiteProvider">Website Provider</label>
+                <select id="websiteProvider" name="websiteProvider">
+                  <option value="">Select website provider</option>
+                  <option>Shopify</option>
+                  <option>Wix</option>
+                  <option>Squarespace</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="identityVerification">Identity Verification Status</label>
+                <div class="check-row">
+                  <input id="identityVerification" name="identityVerification" type="checkbox" />
+                  <span>True / Verified</span>
+                </div>
+                <div class="helper">Unchecked indicates False / Not yet verified.</div>
+              </div>
+
+              <div class="field-full">
+                <label class="required" for="driversLicenseUpload">Driver’s License Upload</label>
+                <div class="upload-box">
+                  <strong>Upload image for identity verification</strong>
+                  <input id="driversLicenseUpload" name="driversLicenseUpload" type="file" accept="image/*,.pdf" />
+                  <div class="helper">Accepted formats can be adjusted based on your Genesys Cloud or host environment requirements.</div>
+                </div>
+              </div>
+
+              <div class="field-full">
+                <label for="businessRegistrationVerification">Business Registration Verification</label>
+                <div class="check-row">
+                  <input id="businessRegistrationVerification" name="businessRegistrationVerification" type="checkbox" />
+                  <span>Business registration confirmed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="footer-actions">
+              <button class="btn btn-secondary" type="reset">Clear Form</button>
+              <button class="btn btn-primary" type="submit">Submit Onboarding</button>
+            </div>
+          </form>
+
+          <div class="script-note">
+            Note: This is front-end HTML for a Genesys Cloud agent script layout. For production use, map each field to your Genesys Cloud script variables or embedded workflow handlers and connect file uploads to your approved secure document storage flow.
+          </div>
+        </div>
+      </section>
+
+      
+    </main>
+  </div>
+</body>
+</html>
