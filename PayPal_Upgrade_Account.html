@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Genesys Cloud Agent Script - Convert Personal PayPal to Business</title>
+  <style>
+    :root {
+      --paypal-blue: #003087;
+      --paypal-light-blue: #009cde;
+      --paypal-dark: #001c64;
+      --ink: #111827;
+      --muted: #5b6472;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --line: #d9e2ec;
+      --success: #15803d;
+      --warn: #b45309;
+      --soft: #eef6ff;
+      --shadow: 0 14px 36px rgba(0, 48, 135, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f7faff 0%, #eef4fb 100%);
+      color: var(--ink);
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--paypal-blue), var(--paypal-light-blue));
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .paypal-mark {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 900px;
+      color: rgba(255,255,255,0.94);
+      font-size: 1rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .column {
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel-header {
+      padding: 20px 22px 12px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .panel-header h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .account-card {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      background: #fbfdff;
+    }
+
+    .mock-account {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .account-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--paypal-blue), var(--paypal-light-blue));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: #fff4e5;
+      color: var(--warn);
+      border: 1px solid #f5d7ad;
+    }
+
+    .account-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .data-tile {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .data-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .data-value {
+      font-weight: 800;
+      font-size: 0.98rem;
+      line-height: 1.2;
+    }
+
+    .account-status {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .ok {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .cta-box {
+      border: 1px solid #bfdcff;
+      background: linear-gradient(180deg, #f4faff 0%, #eaf5ff 100%);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cta-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-box p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .benefits {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .benefit {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid #d3e7ff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.94rem;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #ffc439;
+      color: #111;
+      min-width: 230px;
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--paypal-blue);
+      border: 1px solid #bcd4ef;
+    }
+
+    .section-body {
+      padding: 20px 22px 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+      padding: 16px;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--paypal-blue);
+      color: white;
+      font-size: 0.85rem;
+    }
+
+    .talk-track {
+      margin-top: 10px;
+      border-left: 4px solid var(--paypal-light-blue);
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.96rem;
+    }
+
+    .checklist, .sidebar-list {
+      margin: 8px 0 0 18px;
+      padding: 0;
+      color: var(--muted);
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+      padding: 16px;
+    }
+
+    .mini-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .mini-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fbfdff;
+      padding: 14px 16px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    .response {
+      margin-top: 10px;
+      background: white;
+      border-left: 4px solid var(--paypal-blue);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #1f2937;
+      font-size: 0.95rem;
+    }
+
+    .status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #ecfdf3;
+      color: #166534;
+      border: 1px solid #b7e6c8;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      padding: 0 22px 22px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .account-card { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { padding: 12px; }
+      .hero { padding: 20px; }
+      .account-grid { grid-template-columns: 1fr; }
+      .brand-row { align-items: flex-start; }
+      .button-row { flex-direction: column; }
+      .primary, .secondary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="brand-row">
+        <div>
+          <div class="paypal-mark">PayPal</div>
+          <h1>Convert a personal account to a business account</h1>
+          <p>
+            Genesys Cloud agent script mockup for guiding customers through a PayPal account conversion call.
+            This page includes example customer data, a conversion CTA, required checkpoints, and a ready-to-read talk track.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+          <div class="panel-header">
+            <h2>Customer Account Snapshot</h2>
+            <p>Use this section to confirm the customer identity and explain what changes when they move from personal to business.</p>
+          </div>
+          <div class="account-card">
+            <div class="mock-account">
+              <div class="account-top">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="avatar">JS</div>
+                  <div>
+                    <div style="font-weight:900; font-size:1.05rem;">Jamie Smith</div>
+                    <div style="color:var(--muted); font-size:0.92rem;">jamie.smith@examplemail.com</div>
+                  </div>
+                </div>
+                <div class="badge">Personal Account</div>
+              </div>
+
+              <div class="account-grid">
+                <div class="data-tile">
+                  <div class="data-label">Customer ID</div>
+                  <div class="data-value">PP-4829-1947</div>
+                </div>
+                <div class="data-tile">
+                  <div class="data-label">Country</div>
+                  <div class="data-value">United States</div>
+                </div>
+                <div class="data-tile">
+                  <div class="data-label">Current Usage</div>
+                  <div class="data-value">Selling handmade goods online</div>
+                </div>
+                <div class="data-tile">
+                  <div class="data-label">Monthly Volume</div>
+                  <div class="data-value">Approx. $3,850</div>
+                </div>
+                <div class="data-tile">
+                  <div class="data-label">Business Name to Add</div>
+                  <div class="data-value">Jamie & Co. Crafts</div>
+                </div>
+                <div class="data-tile">
+                  <div class="data-label">Business Type</div>
+                  <div class="data-value">Sole Proprietor</div>
+                </div>
+              </div>
+
+              <div class="account-status">
+                <div class="status-row">
+                  <span>Email confirmed</span>
+                  <span class="ok">Verified</span>
+                </div>
+                <div class="status-row">
+                  <span>Phone confirmed</span>
+                  <span class="ok">Verified</span>
+                </div>
+                <div class="status-row">
+                  <span>Bank linked</span>
+                  <span class="ok">Linked</span>
+                </div>
+                <div class="status-row">
+                  <span>Business profile</span>
+                  <span style="color:var(--warn); font-weight:700;">Not started</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cta-box">
+              <div>
+                <h3>Ready to convert this account?</h3>
+                <p>
+                  Moving to a business account helps the customer present a business name to buyers,
+                  access business-oriented payment tools, and separate personal activity from selling activity.
+                </p>
+                <div class="benefits">
+                  <div class="benefit">Show a business name during checkout</div>
+                  <div class="benefit">Support business selling workflows and reporting</div>
+                  <div class="benefit">Help separate personal and business activity</div>
+                  <div class="benefit">Prepare the account for merchant-facing features</div>
+                </div>
+              </div>
+              <div class="button-row">
+                <button class="primary">Convert to Business Account</button>
+                <button class="secondary">Save for Later</button>
+              </div>
+            </div>
+          </div>
+          <div class="footer-note">
+            Example data shown for mockup purposes only. Replace with your actual CRM and account fields in production.
+          </div>
+        </section>
+
+    <div class="layout">
+      <main class="column">
+        
+      </main>
+
+      
+    </div>
+  </div>
+</body>
+</html>
