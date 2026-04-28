@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayPal Business Loan Application - Agent Script</title>
+  <style>
+    :root {
+      --paypal-blue: #003087;
+      --paypal-light-blue: #009cde;
+      --paypal-navy: #012169;
+      --paypal-bg: #f5f7fa;
+      --paypal-card: #ffffff;
+      --paypal-text: #1f2937;
+      --paypal-muted: #6b7280;
+      --paypal-border: #d1d5db;
+      --paypal-success: #107f3e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef5fb 0%, var(--paypal-bg) 100%);
+      color: var(--paypal-text);
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--paypal-card);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 48, 135, 0.12);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--paypal-blue) 0%, var(--paypal-light-blue) 100%);
+      color: white;
+      padding: 28px 32px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      opacity: 0.95;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 28px 32px 32px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--paypal-navy);
+      margin: 0 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5eef9;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 20px;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--paypal-navy);
+    }
+
+    .required::after {
+      content: " *";
+      color: #b91c1c;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--paypal-border);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--paypal-text);
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--paypal-light-blue);
+      box-shadow: 0 0 0 3px rgba(0, 156, 222, 0.15);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .checkbox-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--paypal-border);
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--paypal-text);
+      font-weight: 600;
+    }
+
+    .checkbox-item input[type="checkbox"],
+    .checkbox-item input[type="radio"] {
+      transform: scale(1.1);
+      accent-color: var(--paypal-blue);
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: var(--paypal-muted);
+      margin-top: -2px;
+    }
+
+    .upload-box {
+      border: 2px dashed #b8d7f0;
+      border-radius: 12px;
+      padding: 18px;
+      background: #f8fbff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 8px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--paypal-blue);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5eef9;
+      color: var(--paypal-navy);
+    }
+
+    .summary {
+      margin-top: 28px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #f8fbff;
+      border: 1px solid #dbeafe;
+    }
+
+    .summary h3 {
+      margin: 0 0 12px;
+      color: var(--paypal-navy);
+      font-size: 16px;
+    }
+
+    .summary p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: var(--paypal-blue);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .content,
+      .header {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>PayPal Business Loan Application</h1>
+      <p>Genesys Cloud Agent Script - Applicant Intake and Verification</p>
+    </div>
+
+    <div class="content">
+      <form id="loanApplicationForm">
+        <h2 class="section-title">Applicant Information</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="firstName" class="required">First Name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required />
+          </div>
+
+          <div class="field">
+            <label for="lastName" class="required">Last Name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required />
+          </div>
+
+          <div class="field full">
+            <label for="businessEntityName" class="required">Business Entity Name</label>
+            <input type="text" id="businessEntityName" name="businessEntityName" placeholder="Enter registered business name" required />
+          </div>
+
+          <div class="field">
+            <label for="businessEmail" class="required">Business Email</label>
+            <input type="email" id="businessEmail" name="businessEmail" placeholder="name@business.com" required />
+          </div>
+
+          <div class="field">
+            <label for="businessPhone" class="required">Business Phone Number</label>
+            <input type="tel" id="businessPhone" name="businessPhone" placeholder="(555) 555-5555" required />
+          </div>
+
+          <div class="field full">
+            <label for="businessAddress" class="required">Business Address</label>
+            <textarea id="businessAddress" name="businessAddress" placeholder="Street, City, State, ZIP" required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="businessType" class="required">Business Type</label>
+            <select id="businessType" name="businessType" required>
+              <option value="">Select business type</option>
+              <option value="llc">LLC</option>
+              <option value="sole_proprietor">Sole Proprietor</option>
+              <option value="corporation">Corporation</option>
+              <option value="partnership">Partnership</option>
+              <option value="s_corporation">S Corporation</option>
+              <option value="nonprofit">Nonprofit</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="taxId" class="required">SSN / EIN</label>
+            <input type="text" id="taxId" name="taxId" placeholder="Enter SSN or EIN" required />
+            <div class="helper-text">Use masked handling in production if displaying sensitive tax identifiers.</div>
+          </div>
+
+          <div class="field">
+            <label for="loanAmount" class="required">Loan Amount Requested</label>
+            <input type="number" id="loanAmount" name="loanAmount" placeholder="Enter requested amount" min="0" step="0.01" required />
+          </div>
+        </div>
+
+        <h2 class="section-title">Verification</h2>
+        <div class="form-grid">
+          <div class="field full">
+            <label class="required">Identity Verification Status</label>
+            <div class="checkbox-row" role="group" aria-label="Identity Verification Status">
+              <label class="checkbox-item">
+                <input type="radio" name="identityVerificationStatus" value="true" required />
+                True
+              </label>
+              <label class="checkbox-item">
+                <input type="radio" name="identityVerificationStatus" value="false" required />
+                False
+              </label>
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="driversLicenseUpload" class="required">Driver's License Upload</label>
+            <div class="upload-box">
+              <input
+                type="file"
+                id="driversLicenseUpload"
+                name="driversLicenseUpload"
+                accept="image/*"
+                required
+              />
+              <div class="helper-text">Upload a clear image of the front of the driver's license for identity verification.</div>
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>Business Registration Verification</label>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="businessRegistrationVerified" name="businessRegistrationVerified" />
+                Business registration verified
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="reset" class="btn btn-secondary">Clear</button>
+          <button type="button" class="btn btn-primary" onclick="generateSummary()">Review Application</button>
+        </div>
+      </form>
+
+      <div class="summary" id="applicationSummary" style="display: none;">
+        <h3>Application Review</h3>
+        <div id="summaryContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getRadioValue(name) {
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      return selected ? selected.value : "Not selected";
+    }
+
+    function generateSummary() {
+      const form = document.getElementById('loanApplicationForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const businessEntityName = document.getElementById('businessEntityName').value;
+      const businessEmail = document.getElementById('businessEmail').value;
+      const businessPhone = document.getElementById('businessPhone').value;
+      const businessAddress = document.getElementById('businessAddress').value;
+      const businessType = document.getElementById('businessType').options[document.getElementById('businessType').selectedIndex].text;
+      const taxId = document.getElementById('taxId').value;
+      const loanAmount = document.getElementById('loanAmount').value;
+      const identityVerificationStatus = getRadioValue('identityVerificationStatus');
+      const driversLicenseUpload = document.getElementById('driversLicenseUpload').files[0];
+      const businessRegistrationVerified = document.getElementById('businessRegistrationVerified').checked;
+
+      const summary = `
+        <p><strong>Applicant:</strong> ${firstName} ${lastName}</p>
+        <p><strong>Business Entity Name:</strong> ${businessEntityName}</p>
+        <p><strong>Business Email:</strong> ${businessEmail}</p>
+        <p><strong>Business Phone Number:</strong> ${businessPhone}</p>
+        <p><strong>Business Address:</strong> ${businessAddress}</p>
+        <p><strong>Business Type:</strong> ${businessType}</p>
+        <p><strong>SSN / EIN:</strong> ${taxId}</p>
+        <p><strong>Loan Amount Requested:</strong> $${Number(loanAmount).toLocaleString()}</p>
+        <p><strong>Identity Verification Status:</strong> <span class="badge">${identityVerificationStatus}</span></p>
+        <p><strong>Driver's License File:</strong> ${driversLicenseUpload ? driversLicenseUpload.name : 'No file uploaded'}</p>
+        <p><strong>Business Registration Verification:</strong> <span class="badge">${businessRegistrationVerified ? 'Verified' : 'Not Verified'}</span></p>
+      `;
+
+      document.getElementById('summaryContent').innerHTML = summary;
+      document.getElementById('applicationSummary').style.display = 'block';
+      document.getElementById('applicationSummary').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
