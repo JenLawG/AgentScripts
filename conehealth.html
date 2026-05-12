@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Health Agent Script - Patient Summary</title>
+  <style>
+    :root {
+      /* Cone Health-inspired palette: teal, green, purple, warm neutrals */
+      --cone-teal: #007c89;
+      --cone-teal-dark: #005e66;
+      --cone-green: #78be20;
+      --cone-purple: #6f2c91;
+      --cone-blue: #003f63;
+      --cone-bg: #f4f8f8;
+      --cone-card: #ffffff;
+      --cone-border: #d8e4e5;
+      --cone-text: #263238;
+      --cone-muted: #607d8b;
+      --cone-warning: #fff4d6;
+      --cone-warning-border: #f3cf73;
+      --cone-danger: #b3261e;
+      --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef8f7 0%, #f8fbf6 48%, #f6f1fa 100%);
+      color: var(--cone-text);
+    }
+
+    .agent-script {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 30% 30%, var(--cone-green) 0 22%, transparent 23%),
+        radial-gradient(circle at 70% 30%, var(--cone-purple) 0 20%, transparent 21%),
+        radial-gradient(circle at 48% 70%, var(--cone-teal) 0 27%, transparent 28%),
+        #e8f4f3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 124, 137, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--cone-teal-dark);
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--cone-muted);
+      font-size: 14px;
+    }
+
+    .call-status {
+      text-align: right;
+      font-size: 14px;
+      color: var(--cone-muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cone-teal-dark);
+      background: #e6f5f4;
+      border: 1px solid #b8dddd;
+      margin-bottom: 6px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--cone-green);
+      border-radius: 999px;
+      box-shadow: 0 0 0 4px rgba(120, 190, 32, 0.18);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cone-border);
+      background: #fbfdfd;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--cone-teal-dark);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      color: #ffffff;
+      background: var(--cone-blue);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d7d9;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      color: var(--cone-text);
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--cone-teal);
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .ehr-banner {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--cone-border);
+      border-radius: 15px;
+      background: #fbfdfd;
+      padding: 13px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--cone-muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      color: var(--cone-teal-dark);
+      font-size: 15px;
+    }
+
+    .clinical-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .clinical-list li {
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 13px;
+      padding: 12px 13px;
+      background: #ffffff;
+    }
+
+    .clinical-list li.green {
+      border-left-color: var(--cone-green);
+    }
+
+    .clinical-list li.purple {
+      border-left-color: var(--cone-purple);
+    }
+
+    .clinical-list li.blue {
+      border-left-color: var(--cone-blue);
+    }
+
+    .list-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+      font-weight: 700;
+      color: var(--cone-text);
+    }
+
+    .list-title small {
+      color: var(--cone-muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .list-subtext {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      border: 1px solid #bad9dc;
+      background: #ffffff;
+      color: var(--cone-teal-dark);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: var(--cone-teal);
+      color: #ffffff;
+      border-color: var(--cone-teal);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.danger {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      background: var(--cone-teal);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: #eaf4f5;
+      color: var(--cone-teal-dark);
+      border: 1px solid #bad9dc;
+    }
+
+    button.danger {
+      background: #fdebea;
+      color: var(--cone-danger);
+      border: 1px solid #f5c6c3;
+    }
+
+    .two-column-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .privacy-note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--cone-danger);
+    }
+
+    @media (max-width: 960px) {
+      .layout,
+      .ehr-banner {
+        grid-template-columns: 1fr;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .call-status {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .agent-script {
+        padding: 14px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="agent-script">
+    <header class="top-bar" aria-label="Cone Health agent script header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Cone Health Patient Access Script</h1>
+          <p>Genesys Cloud agent view | EHR-style patient summary</p>
+        </div>
+      </div>
+      <div class="call-status">
+        <div class="pill"><span class="status-dot"></span>Active Patient Call</div>
+        <div>Queue: Patient Financial Services | Screen: Benefits & Care Context</div>
+      </div>
+    </header>
+
+    <section class="ehr-banner" aria-label="Patient snapshot">
+      <div class="metric">
+        <span>Patient Status</span>
+        <strong>Established</strong>
+      </div>
+      <div class="metric">
+        <span>MRN</span>
+        <strong>CH-2048176</strong>
+      </div>
+      <div class="metric">
+        <span>Preferred Language</span>
+        <strong>English</strong>
+      </div>
+      <div class="metric">
+        <span>MyChart</span>
+        <strong>Active</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-label="Caller and patient information">
+        <div class="card-header">
+          <h2>Patient Information</h2>
+          <span class="section-tag">Registration</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Agent opening:</strong> Thank you for calling Cone Health. I can help verify your information, review insurance details, and look at upcoming care activity. For privacy, may I verify your name and date of birth?
+          </div>
+
+          <form id="patientForm">
+            <div class="form-grid">
+              <div>
+                <label for="firstName" class="required">First Name</label>
+                <input id="firstName" name="firstName" type="text" value="Jordan" autocomplete="given-name" />
+              </div>
+
+              <div>
+                <label for="lastName" class="required">Last Name</label>
+                <input id="lastName" name="lastName" type="text" value="Williams" autocomplete="family-name" />
+              </div>
+
+              <div>
+                <label for="dob" class="required">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="1978-09-14" />
+              </div>
+
+              <div>
+                <label for="phone">Primary Phone</label>
+                <input id="phone" name="phone" type="tel" value="336-555-0198" autocomplete="tel" />
+              </div>
+
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" value="jordan.williams@example.com" autocomplete="email" />
+              </div>
+
+              <div>
+                <label for="preferredContact">Preferred Contact Method</label>
+                <select id="preferredContact" name="preferredContact">
+                  <option>Phone</option>
+                  <option>Text Message</option>
+                  <option>Email</option>
+                  <option>MyChart Message</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="insuranceType" class="required">Insurance Type</label>
+                <select id="insuranceType" name="insuranceType">
+                  <option value="">Select Cone Health contracted plan</option>
+
+                  <optgroup label="Commercial">
+                    <option>Aetna</option>
+                    <option>Beech Street</option>
+                    <option>Blue Cross Blue Shield NC</option>
+                    <option>Centivo</option>
+                    <option>Cigna</option>
+                    <option>Healthy Blue Children and Families Specialty Plan</option>
+                    <option>Humana (ChoiceCare)</option>
+                    <option>Medcost</option>
+                    <option>Mutual of Omaha</option>
+                    <option>PHCS/Multiplan</option>
+                    <option>Piedmont Community Health Alliance (Gateway TPA)</option>
+                    <option>Primary PhysicianCare</option>
+                    <option>Simplified Benefit Administrators</option>
+                    <option>United Healthcare</option>
+                  </optgroup>
+
+                  <optgroup label="Behavioral Health">
+                    <option>Carelon</option>
+                    <option>Carolina Behavioral Health Alliance LLS</option>
+                    <option>Cigna Behavioral Health, Inc.</option>
+                    <option>Magellan Behavioral Health, Inc.</option>
+                    <option>Partners Behavioral Health Management</option>
+                    <option>Trillium Health Resources</option>
+                    <option>United Healthcare Behavioral Health</option>
+                    <option>Vaya Health</option>
+                  </optgroup>
+
+                  <optgroup label="Exchange">
+                    <option>Blue Advantage</option>
+                    <option>Blue Home with Cone Health</option>
+                    <option>Cigna Exchange</option>
+                    <option>Oscar</option>
+                    <option>United Healthcare Exchange</option>
+                  </optgroup>
+
+                  <optgroup label="Medicaid">
+                    <option>NC Medicaid AmeriHealth Caritas</option>
+                    <option>NC Medicaid Carolina Complete</option>
+                    <option>NC Medicaid Healthy Blue</option>
+                    <option>NC Medicaid United Healthcare</option>
+                    <option>NC Medicaid WellCare</option>
+                    <option>Virginia Premier Health Plan, Inc.</option>
+                  </optgroup>
+
+                  <optgroup label="Medicare">
+                    <option>Aetna Medicare</option>
+                    <option>Align Senior Care, Inc. (Virginia)</option>
+                    <option>Blue Cross Blue Shield NC Medicare</option>
+                    <option>Cigna Medicare</option>
+                    <option>Devoted Health</option>
+                    <option>HealthTeam Advantage</option>
+                    <option>Humana Medicare</option>
+                    <option>Liberty Advantage, LLC</option>
+                    <option>Longevity Health Plan of North Carolina, Inc.</option>
+                    <option>Provider Partners Health Plan of North Carolina, Inc.</option>
+                    <option>PruittHealth Premier of North Carolina</option>
+                    <option>United Healthcare Medicare</option>
+                    <option>Virginia Premier Health Plan, Inc.</option>
+                    <option>WellCare Medicare</option>
+                  </optgroup>
+
+                  <optgroup label="Tailored Plans and Medicaid Direct">
+                    <option>Partners</option>
+                    <option>Trillium</option>
+                    <option>Vaya</option>
+                  </optgroup>
+
+                  <optgroup label="Other">
+                    <option>ChampVA</option>
+                    <option>Hospice Of Alamance</option>
+                    <option>Hospice Of Greensboro</option>
+                    <option>NaphCare</option>
+                    <option>Pace of the Triad</option>
+                    <option>TriCare</option>
+                    <option>Trellis Supportive Care</option>
+                    <option>Veteran’s Administration Community Care Network</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div>
+                <label for="memberId">Member ID</label>
+                <input id="memberId" name="memberId" type="text" value="BCN-77824019" />
+              </div>
+
+              <div>
+                <label for="pcp">Primary Care Provider</label>
+                <input id="pcp" name="pcp" type="text" value="Maya Reynolds, MD" />
+              </div>
+
+              <div class="full">
+                <label for="address">Address</label>
+                <input id="address" name="address" type="text" value="120 Oakview Drive, Greensboro, NC 27401" autocomplete="street-address" />
+              </div>
+
+              <div class="full">
+                <label for="agentNotes">Agent Notes</label>
+                <textarea id="agentNotes" name="agentNotes">Caller is asking whether upcoming cardiology visit is in-network and whether referral is on file.</textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="button" onclick="saveSummary()">Save Call Summary</button>
+              <button class="secondary" type="button" onclick="copyScript()">Copy Closing Script</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <div class="two-column-stack">
+        <section class="card" aria-label="EHR clinical context">
+          <div class="card-header">
+            <h2>EHR Snapshot</h2>
+            <span class="section-tag">Epic-style Context</span>
+          </div>
+          <div class="card-body">
+            <div class="alert">
+              Confirm identity before discussing protected health information. This mock screen is for script design only and should be connected to approved Genesys Cloud/EHR integrations before production use.
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Clinical information tabs">
+              <button class="tab-button active" type="button" data-tab="medications">Medications</button>
+              <button class="tab-button" type="button" data-tab="appointments">Appointments</button>
+              <button class="tab-button" type="button" data-tab="referrals">Referrals</button>
+              <button class="tab-button" type="button" data-tab="tasks">Agent Tasks</button>
+            </div>
+
+            <div id="medications" class="tab-panel active">
+              <ul class="clinical-list">
+                <li>
+                  <div class="list-title">Lisinopril 10 mg <small>Active</small></div>
+                  <div class="list-subtext">Take 1 tablet by mouth daily. Last reviewed: 05/02/2026.</div>
+                </li>
+                <li class="green">
+                  <div class="list-title">Atorvastatin 20 mg <small>Active</small></div>
+                  <div class="list-subtext">Take 1 tablet by mouth nightly. Refill available.</div>
+                </li>
+                <li class="purple">
+                  <div class="list-title">Metformin ER 500 mg <small>Active</small></div>
+                  <div class="list-subtext">Take 2 tablets by mouth with evening meal. Pharmacy: Cone Health Community Pharmacy.</div>
+                </li>
+              </ul>
+            </div>
+
+            <div id="appointments" class="tab-panel">
+              <ul class="clinical-list">
+                <li class="blue">
+                  <div class="list-title">Cardiology Follow-up <small>May 21, 2026</small></div>
+                  <div class="list-subtext">Cone Health HeartCare at Northline. Arrival: 9:15 AM. Provider: Dr. S. Patel.</div>
+                </li>
+                <li>
+                  <div class="list-title">Primary Care Annual Visit <small>Jun 04, 2026</small></div>
+                  <div class="list-subtext">Cone Health Primary Care at Elmsley Square. Arrival: 1:00 PM.</div>
+                </li>
+                <li class="green">
+                  <div class="list-title">Lab Appointment <small>Jun 03, 2026</small></div>
+                  <div class="list-subtext">Fasting lipid panel and A1C ordered. Location: Medical Center lab.</div>
+                </li>
+              </ul>
+            </div>
+
+            <div id="referrals" class="tab-panel">
+              <ul class="clinical-list">
+                <li class="purple">
+                  <div class="list-title">Cardiology Referral <small>Authorized</small></div>
+                  <div class="list-subtext">Referral ID REF-88341. Valid 04/20/2026 through 10/20/2026. 3 visits remaining.</div>
+                </li>
+                <li>
+                  <div class="list-title">Nutrition Counseling <small>Pending Review</small></div>
+                  <div class="list-subtext">Referral requested by PCP. Awaiting payer authorization.</div>
+                </li>
+              </ul>
+            </div>
+
+            <div id="tasks" class="tab-panel">
+              <ul class="clinical-list">
+                <li>
+                  <div class="list-title">Verify Insurance Eligibility <small>Required</small></div>
+                  <div class="list-subtext">Confirm plan, member ID, effective date, and network status before discussing estimated out-of-pocket cost.</div>
+                </li>
+                <li class="green">
+                  <div class="list-title">Confirm Referral on File <small>Recommended</small></div>
+                  <div class="list-subtext">Read referral status and expiration date to patient if identity verification is complete.</div>
+                </li>
+                <li class="blue">
+                  <div class="list-title">Offer MyChart Follow-up <small>Optional</small></div>
+                  <div class="list-subtext">Offer to send appointment and prep instructions through MyChart.</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-label="Agent script guidance">
+          <div class="card-header">
+            <h2>Suggested Agent Language</h2>
+            <span class="section-tag">Guidance</span>
+          </div>
+          <div class="card-body">
+            <div class="script-box" id="closingScript">
+              I’ve verified the information we reviewed today. Your upcoming appointment and referral details are noted, and your insurance selection has been captured for follow-up. Please remember that final coverage and benefits are determined by your insurance plan.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-button');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+
+        tabs.forEach((button) => button.classList.remove('active'));
+        panels.forEach((panel) => panel.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    function saveSummary() {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const insuranceType = document.getElementById('insuranceType').value;
+      const notes = document.getElementById('agentNotes').value.trim();
+
+      const summary = {
+        patientName: `${firstName} ${lastName}`,
+        insuranceType,
+        notes,
+        savedAt: new Date().toISOString()
+      };
+
+      console.log('Genesys Cloud script summary payload:', summary);
+      alert('Demo summary saved to console. Connect this action to a Genesys Cloud data action or script variable in production.');
+    }
+
+    async function copyScript() {
+      const text = document.getElementById('closingScript').innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Closing script copied.');
+      } catch (error) {
+        alert('Copy failed. Please select and copy the script manually.');
+      }
+    }
+  </script>
+</body>
+</html>
