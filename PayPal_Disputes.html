@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayPal Dispute Assist - Genesys Cloud Agent Script Demo</title>
+  <style>
+    :root {
+      /* PayPal-inspired palette from PayPal Brand Identity Quick Guide */
+      --paypal-left-blue: #003087;
+      --paypal-middle-blue: #001c64;
+      --paypal-right-blue: #0070e0;
+      --paypal-slate: #001435;
+      --paypal-off-white: #faf8f5;
+      --paypal-white: #ffffff;
+      --success: #107c41;
+      --warning: #b85c00;
+      --danger: #c9352b;
+      --border: #d7e0ea;
+      --muted: #5f6b7a;
+      --shadow: 0 12px 30px rgba(0, 20, 53, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: linear-gradient(145deg, var(--paypal-off-white) 0%, #eef6ff 100%);
+      color: var(--paypal-slate);
+    }
+
+    .script-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background: var(--paypal-white);
+      border: 1px solid rgba(0, 48, 135, 0.1);
+      border-radius: 24px;
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .paypal-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--paypal-left-blue), var(--paypal-right-blue));
+      display: grid;
+      place-items: center;
+      color: var(--paypal-white);
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: -2px;
+      box-shadow: 0 10px 18px rgba(0, 112, 224, 0.25);
+    }
+
+    .brand-title h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      color: var(--paypal-slate);
+    }
+
+    .brand-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .case-chip {
+      background: rgba(0, 112, 224, 0.1);
+      color: var(--paypal-left-blue);
+      border: 1px solid rgba(0, 112, 224, 0.2);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.7fr);
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 48, 135, 0.1);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--paypal-slate);
+    }
+
+    .card-header p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, var(--paypal-slate), var(--paypal-left-blue) 55%, var(--paypal-right-blue));
+      color: var(--paypal-white);
+      border: 0;
+    }
+
+    .balance-card .card-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .balance-card h2,
+    .balance-card p {
+      color: var(--paypal-white);
+    }
+
+    .balance-amount {
+      padding: 26px 24px 28px;
+    }
+
+    .balance-amount .label {
+      display: block;
+      font-size: 13px;
+      opacity: 0.82;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .balance-amount .amount {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .account-meta {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .account-meta div {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #f7fbff;
+    }
+
+    tr.transaction-row {
+      cursor: pointer;
+      transition: background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    tr.transaction-row:hover {
+      background: rgba(0, 112, 224, 0.06);
+    }
+
+    tr.transaction-row.selected {
+      background: rgba(0, 112, 224, 0.13);
+      box-shadow: inset 5px 0 0 var(--paypal-right-blue);
+    }
+
+    .radio-cell {
+      width: 46px;
+    }
+
+    input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--paypal-right-blue);
+      cursor: pointer;
+    }
+
+    .merchant {
+      font-weight: 800;
+      color: var(--paypal-slate);
+    }
+
+    .subtext {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .amount.negative {
+      color: var(--danger);
+      font-weight: 800;
+    }
+
+    .amount.positive {
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status-complete {
+      background: rgba(16, 124, 65, 0.11);
+      color: var(--success);
+    }
+
+    .status-review {
+      background: rgba(184, 92, 0, 0.12);
+      color: var(--warning);
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .selected-panel {
+      padding: 22px 24px;
+    }
+
+    .selected-panel h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .selected-empty {
+      padding: 16px;
+      background: #f7fbff;
+      border: 1px dashed #b8c8d9;
+      border-radius: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .detail-grid {
+      display: none;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .detail-row span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .detail-row span:last-child {
+      font-weight: 800;
+    }
+
+    .agent-actions {
+      display: none;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-btn {
+      background: var(--paypal-right-blue);
+      color: var(--paypal-white);
+      box-shadow: 0 10px 18px rgba(0, 112, 224, 0.25);
+    }
+
+    .secondary-btn {
+      background: rgba(0, 48, 135, 0.09);
+      color: var(--paypal-left-blue);
+    }
+
+    .script-footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .card-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .case-chip {
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="script-shell">
+    <section class="topbar" aria-label="PayPal account dispute header">
+      <div class="brand-block">
+        <div class="paypal-mark" aria-label="PayPal demo mark">P</div>
+        <div class="brand-title">
+          <h1>PayPal Dispute Assist</h1>
+          <p>Genesys Cloud agent script demo screen</p>
+        </div>
+      </div>
+      <div class="case-chip">Dispute reason: Customer does not recognize charge</div>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Previous transactions</h2>
+            <p>Select the transaction the customer wants to dispute.</p>
+          </div>
+          <div class="case-chip">Customer: Sam Law</div>
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Previous PayPal transactions">
+            <thead>
+              <tr>
+                <th class="radio-cell">Select</th>
+                <th>Merchant</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="transactionBody">
+              <tr class="transaction-row" data-id="TXN-40291" data-merchant="Texas Roadhouse" data-date="February 28, 2026" data-location="Missoula, MT" data-category="Dining" data-amount="$123.54" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Texas Roadhouse transaction" /></td>
+                <td>
+                  <div class="merchant">Texas Roadhouse</div>
+                  <div class="subtext">Transaction ID: TXN-40291</div>
+                </td>
+                <td>Feb 28, 2026</td>
+                <td>Missoula, MT</td>
+                <td>Dining</td>
+                <td class="amount negative">-$123.54</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40288" data-merchant="Target" data-date="February 26, 2026" data-location="Helena, MT" data-category="Retail" data-amount="$42.18" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Target transaction" /></td>
+                <td>
+                  <div class="merchant">Target</div>
+                  <div class="subtext">Transaction ID: TXN-40288</div>
+                </td>
+                <td>Feb 26, 2026</td>
+                <td>Helena, MT</td>
+                <td>Retail</td>
+                <td class="amount negative">-$42.18</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40267" data-merchant="Direct Deposit" data-date="February 23, 2026" data-location="Payroll" data-category="Income" data-amount="$250.00" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Direct Deposit transaction" /></td>
+                <td>
+                  <div class="merchant">Direct Deposit</div>
+                  <div class="subtext">Transaction ID: TXN-40267</div>
+                </td>
+                <td>Feb 23, 2026</td>
+                <td>Payroll</td>
+                <td>Income</td>
+                <td class="amount positive">+$250.00</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40244" data-merchant="Albertsons" data-date="February 21, 2026" data-location="Missoula, MT" data-category="Groceries" data-amount="$67.32" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Albertsons transaction" /></td>
+                <td>
+                  <div class="merchant">Albertsons</div>
+                  <div class="subtext">Transaction ID: TXN-40244</div>
+                </td>
+                <td>Feb 21, 2026</td>
+                <td>Missoula, MT</td>
+                <td>Groceries</td>
+                <td class="amount negative">-$67.32</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40211" data-merchant="StreamBox" data-date="February 18, 2026" data-location="Online" data-category="Subscription" data-amount="$15.99" data-status="In review">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select StreamBox transaction" /></td>
+                <td>
+                  <div class="merchant">StreamBox</div>
+                  <div class="subtext">Transaction ID: TXN-40211</div>
+                </td>
+                <td>Feb 18, 2026</td>
+                <td>Online</td>
+                <td>Subscription</td>
+                <td class="amount negative">-$15.99</td>
+                <td><span class="status-pill status-review">In review</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="side-stack">
+        <section class="card balance-card" aria-label="Current account balance">
+          <div class="card-header">
+            <div>
+              <h2>Current account balance</h2>
+              <p>Available PayPal balance</p>
+            </div>
+          </div>
+          <div class="balance-amount">
+            <span class="label">Available now</span>
+            <span class="amount">$89.76</span>
+            <div class="account-meta">
+              <div><span>Account status</span><strong>Verified</strong></div>
+              <div><span>Preferred method</span><strong>PayPal Balance</strong></div>
+              <div><span>Last activity</span><strong>Feb 28, 2026</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card selected-panel" aria-label="Selected transaction dispute panel">
+          <h2>Selected transaction</h2>
+          <div id="selectedEmpty" class="selected-empty">
+            No transaction selected. Ask the customer to identify the charge they want to dispute, then select it from the list.
+          </div>
+
+          <div id="selectedDetails" class="detail-grid" aria-live="polite">
+            <div class="detail-row"><span>Merchant</span><span id="detailMerchant">--</span></div>
+            <div class="detail-row"><span>Date</span><span id="detailDate">--</span></div>
+            <div class="detail-row"><span>Location</span><span id="detailLocation">--</span></div>
+            <div class="detail-row"><span>Category</span><span id="detailCategory">--</span></div>
+            <div class="detail-row"><span>Amount</span><span id="detailAmount">--</span></div>
+            <div class="detail-row"><span>Status</span><span id="detailStatus">--</span></div>
+            <div class="detail-row"><span>Transaction ID</span><span id="detailId">--</span></div>
+          </div>
+
+          <div id="agentActions" class="agent-actions">
+            <button class="primary-btn" type="button" onclick="startDispute()">Start dispute</button>
+            <button class="secondary-btn" type="button" onclick="copyTransactionSummary()">Copy summary</button>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <p class="script-footer">Demo UI only. Replace mock data and button handlers with Genesys Cloud script variables, actions, or secure API integrations as needed.</p>
+  </main>
+
+  <script>
+    const rows = Array.from(document.querySelectorAll('.transaction-row'));
+    let selectedTransaction = null;
+
+    rows.forEach((row) => {
+      row.addEventListener('click', () => selectTransaction(row));
+      row.querySelector('input[type="radio"]').addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectTransaction(row);
+      });
+    });
+
+    function selectTransaction(row) {
+      rows.forEach((item) => {
+        item.classList.remove('selected');
+        item.querySelector('input[type="radio"]').checked = false;
+      });
+
+      row.classList.add('selected');
+      row.querySelector('input[type="radio"]').checked = true;
+
+      selectedTransaction = {
+        id: row.dataset.id,
+        merchant: row.dataset.merchant,
+        date: row.dataset.date,
+        location: row.dataset.location,
+        category: row.dataset.category,
+        amount: row.dataset.amount,
+        status: row.dataset.status
+      };
+
+      document.getElementById('selectedEmpty').style.display = 'none';
+      document.getElementById('selectedDetails').style.display = 'grid';
+      document.getElementById('agentActions').style.display = 'flex';
+
+      document.getElementById('detailMerchant').textContent = selectedTransaction.merchant;
+      document.getElementById('detailDate').textContent = selectedTransaction.date;
+      document.getElementById('detailLocation').textContent = selectedTransaction.location;
+      document.getElementById('detailCategory').textContent = selectedTransaction.category;
+      document.getElementById('detailAmount').textContent = selectedTransaction.amount;
+      document.getElementById('detailStatus').textContent = selectedTransaction.status;
+      document.getElementById('detailId').textContent = selectedTransaction.id;
+    }
+
+    function startDispute() {
+      if (!selectedTransaction) return;
+
+      /*
+        Genesys Cloud adaptation idea:
+        - Map selectedTransaction fields to script variables.
+        - Trigger a script action to move to the dispute intake page.
+        - Or send selectedTransaction to a secure middleware/API endpoint.
+      */
+      alert(
+        `Dispute started for ${selectedTransaction.merchant} | ${selectedTransaction.amount} | ${selectedTransaction.date} | ${selectedTransaction.id}`
+      );
+    }
+
+    function copyTransactionSummary() {
+      if (!selectedTransaction) return;
+
+      const summary = `Customer selected transaction ${selectedTransaction.id}: ${selectedTransaction.merchant}, ${selectedTransaction.amount}, ${selectedTransaction.date}, ${selectedTransaction.location}, status ${selectedTransaction.status}.`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(summary).then(() => alert('Transaction summary copied.'));
+      } else {
+        const temp = document.createElement('textarea');
+        temp.value = summary;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert('Transaction summary copied.');
+      }
+    }
+  </script>
+</body>
+</html>
