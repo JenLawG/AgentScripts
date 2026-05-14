@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayPal Account Freeze - Genesys Cloud Agent Script Demo</title>
+  <style>
+    :root {
+      /* PayPal-inspired palette from PayPal Brand Identity Quick Guide */
+      --paypal-left-blue: #003087;
+      --paypal-middle-blue: #001c64;
+      --paypal-right-blue: #0070e0;
+      --paypal-slate: #001435;
+      --paypal-off-white: #faf8f5;
+      --paypal-white: #ffffff;
+      --success: #107c41;
+      --warning: #b85c00;
+      --danger: #c9352b;
+      --border: #d7e0ea;
+      --muted: #5f6b7a;
+      --shadow: 0 12px 30px rgba(0, 20, 53, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: linear-gradient(145deg, var(--paypal-off-white) 0%, #eef6ff 100%);
+      color: var(--paypal-slate);
+    }
+
+    .script-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background: var(--paypal-white);
+      border: 1px solid rgba(0, 48, 135, 0.1);
+      border-radius: 24px;
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .paypal-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--paypal-left-blue), var(--paypal-right-blue));
+      display: grid;
+      place-items: center;
+      color: var(--paypal-white);
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: -2px;
+      box-shadow: 0 10px 18px rgba(0, 112, 224, 0.25);
+    }
+
+    .brand-title h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      color: var(--paypal-slate);
+    }
+
+    .brand-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .case-chip {
+      background: rgba(0, 112, 224, 0.1);
+      color: var(--paypal-left-blue);
+      border: 1px solid rgba(0, 112, 224, 0.2);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .hero-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 0;
+      background: var(--paypal-white);
+      border: 1px solid rgba(0, 48, 135, 0.1);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .balance-panel {
+      background: linear-gradient(135deg, var(--paypal-slate), var(--paypal-left-blue) 55%, var(--paypal-right-blue));
+      color: var(--paypal-white);
+      padding: 28px;
+    }
+
+    .balance-panel .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.86;
+      margin-bottom: 14px;
+    }
+
+    .balance-panel h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .balance-amount {
+      display: block;
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      margin: 8px 0 18px;
+    }
+
+    .account-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .account-meta div {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 13px;
+    }
+
+    .account-meta span {
+      display: block;
+      font-size: 12px;
+      opacity: 0.78;
+      margin-bottom: 5px;
+    }
+
+    .account-meta strong {
+      font-size: 14px;
+    }
+
+    .freeze-panel {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .freeze-panel h2 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--paypal-slate);
+    }
+
+    .freeze-panel p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .risk-box {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .risk-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 14px;
+      background: #f7fbff;
+    }
+
+    .risk-item span:first-child {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .risk-item strong {
+      color: var(--paypal-slate);
+    }
+
+    .freeze-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .freeze-btn {
+      background: var(--paypal-right-blue);
+      color: var(--paypal-white);
+      box-shadow: 0 10px 18px rgba(0, 112, 224, 0.25);
+      min-width: 170px;
+    }
+
+    .freeze-btn.frozen {
+      background: var(--danger);
+      box-shadow: 0 10px 18px rgba(201, 53, 43, 0.2);
+    }
+
+    .secondary-btn {
+      background: rgba(0, 48, 135, 0.09);
+      color: var(--paypal-left-blue);
+    }
+
+    .status-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(201, 53, 43, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(201, 53, 43, 0.22);
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .status-banner.active {
+      display: flex;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 48, 135, 0.1);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--paypal-slate);
+    }
+
+    .card-header p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #f7fbff;
+    }
+
+    tr.transaction-row {
+      cursor: pointer;
+      transition: background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    tr.transaction-row:hover {
+      background: rgba(0, 112, 224, 0.06);
+    }
+
+    tr.transaction-row.selected {
+      background: rgba(0, 112, 224, 0.13);
+      box-shadow: inset 5px 0 0 var(--paypal-right-blue);
+    }
+
+    .radio-cell {
+      width: 46px;
+    }
+
+    input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--paypal-right-blue);
+      cursor: pointer;
+    }
+
+    .merchant {
+      font-weight: 800;
+      color: var(--paypal-slate);
+    }
+
+    .subtext {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .amount.negative {
+      color: var(--danger);
+      font-weight: 800;
+    }
+
+    .amount.positive {
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status-complete {
+      background: rgba(16, 124, 65, 0.11);
+      color: var(--success);
+    }
+
+    .status-review {
+      background: rgba(184, 92, 0, 0.12);
+      color: var(--warning);
+    }
+
+    .selected-drawer {
+      padding: 16px 24px 22px;
+      background: #fbfdff;
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .selected-drawer.active {
+      display: block;
+    }
+
+    .selected-drawer h3 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .detail-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--paypal-white);
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .detail-item span {
+      display: block;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .detail-item strong {
+      color: var(--paypal-slate);
+      font-size: 14px;
+    }
+
+    .script-footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 940px) {
+      .hero-card {
+        grid-template-columns: 1fr;
+      }
+
+      .account-meta,
+      .detail-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .script-shell {
+        padding: 16px;
+      }
+
+      .topbar,
+      .card-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .case-chip {
+        width: fit-content;
+      }
+
+      .account-meta,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .balance-amount {
+        font-size: 42px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="script-shell">
+    <section class="topbar" aria-label="PayPal account freeze header">
+      <div class="brand-block">
+        <div class="paypal-mark" aria-label="PayPal demo mark">P</div>
+        <div class="brand-title">
+          <h1>PayPal Account Freeze Assist</h1>
+          <p>Genesys Cloud agent script demo screen</p>
+        </div>
+      </div>
+      <div class="case-chip">Customer: Sam Law</div>
+    </section>
+
+    <section class="page-grid">
+      <section class="hero-card" aria-label="Account balance and freeze controls">
+        <div class="balance-panel">
+          <span class="eyebrow">Account overview</span>
+          <h2>Current account balance</h2>
+          <span class="balance-amount">$89.76</span>
+          <div class="account-meta">
+            <div><span>Status</span><strong id="accountStatus">Active</strong></div>
+            <div><span>Account type</span><strong>PayPal Balance</strong></div>
+            <div><span>Last activity</span><strong>Feb 28, 2026</strong></div>
+          </div>
+        </div>
+
+        <div class="freeze-panel">
+          <div>
+            <h2>Freeze account</h2>
+            <p>Use this action when the customer reports suspicious activity or wants to temporarily restrict account movement while the issue is reviewed.</p>
+
+            <div class="risk-box" aria-label="Account freeze checklist">
+              <div class="risk-item"><span>Identity check</span><strong>Verified</strong></div>
+              <div class="risk-item"><span>Recent risk signal</span><strong>Unrecognized charge</strong></div>
+              <div class="risk-item"><span>Freeze scope</span><strong>Payments & transfers</strong></div>
+            </div>
+          </div>
+
+          <div class="status-banner" id="freezeBanner">
+            <span>Account freeze is active. Outgoing payments and transfers are restricted.</span>
+          </div>
+
+          <div class="freeze-actions">
+            <button id="freezeButton" class="freeze-btn" type="button" onclick="toggleFreeze()">Freeze account</button>
+            <button class="secondary-btn" type="button" onclick="copyFreezeSummary()">Copy case summary</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Recent PayPal transactions">
+        <div class="card-header">
+          <div>
+            <h2>Recent transactions</h2>
+            <p>Review recent activity while discussing the freeze request with the customer.</p>
+          </div>
+          <div class="case-chip">Freeze review: Payments & transfers</div>
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Previous PayPal transactions">
+            <thead>
+              <tr>
+                <th class="radio-cell">Select</th>
+                <th>Merchant</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="transactionBody">
+              <tr class="transaction-row" data-id="TXN-40291" data-merchant="Texas Roadhouse" data-date="February 28, 2026" data-location="Missoula, MT" data-category="Dining" data-amount="$123.54" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Texas Roadhouse transaction" /></td>
+                <td>
+                  <div class="merchant">Texas Roadhouse</div>
+                  <div class="subtext">Transaction ID: TXN-40291</div>
+                </td>
+                <td>Feb 28, 2026</td>
+                <td>Missoula, MT</td>
+                <td>Dining</td>
+                <td class="amount negative">-$123.54</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40288" data-merchant="Target" data-date="February 26, 2026" data-location="Helena, MT" data-category="Retail" data-amount="$42.18" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Target transaction" /></td>
+                <td>
+                  <div class="merchant">Target</div>
+                  <div class="subtext">Transaction ID: TXN-40288</div>
+                </td>
+                <td>Feb 26, 2026</td>
+                <td>Helena, MT</td>
+                <td>Retail</td>
+                <td class="amount negative">-$42.18</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40267" data-merchant="Direct Deposit" data-date="February 23, 2026" data-location="Payroll" data-category="Income" data-amount="$250.00" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Direct Deposit transaction" /></td>
+                <td>
+                  <div class="merchant">Direct Deposit</div>
+                  <div class="subtext">Transaction ID: TXN-40267</div>
+                </td>
+                <td>Feb 23, 2026</td>
+                <td>Payroll</td>
+                <td>Income</td>
+                <td class="amount positive">+$250.00</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40244" data-merchant="Albertsons" data-date="February 21, 2026" data-location="Missoula, MT" data-category="Groceries" data-amount="$67.32" data-status="Completed">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select Albertsons transaction" /></td>
+                <td>
+                  <div class="merchant">Albertsons</div>
+                  <div class="subtext">Transaction ID: TXN-40244</div>
+                </td>
+                <td>Feb 21, 2026</td>
+                <td>Missoula, MT</td>
+                <td>Groceries</td>
+                <td class="amount negative">-$67.32</td>
+                <td><span class="status-pill status-complete">Completed</span></td>
+              </tr>
+
+              <tr class="transaction-row" data-id="TXN-40211" data-merchant="StreamBox" data-date="February 18, 2026" data-location="Online" data-category="Subscription" data-amount="$15.99" data-status="In review">
+                <td class="radio-cell"><input type="radio" name="transaction" aria-label="Select StreamBox transaction" /></td>
+                <td>
+                  <div class="merchant">StreamBox</div>
+                  <div class="subtext">Transaction ID: TXN-40211</div>
+                </td>
+                <td>Feb 18, 2026</td>
+                <td>Online</td>
+                <td>Subscription</td>
+                <td class="amount negative">-$15.99</td>
+                <td><span class="status-pill status-review">In review</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="selectedDrawer" class="selected-drawer" aria-live="polite">
+          <h3>Selected transaction</h3>
+          <div class="detail-grid">
+            <div class="detail-item"><span>Merchant</span><strong id="detailMerchant">--</strong></div>
+            <div class="detail-item"><span>Date</span><strong id="detailDate">--</strong></div>
+            <div class="detail-item"><span>Location</span><strong id="detailLocation">--</strong></div>
+            <div class="detail-item"><span>Amount</span><strong id="detailAmount">--</strong></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <p class="script-footer">Demo UI only. Replace mock data and button handlers with Genesys Cloud script variables, actions, or secure API integrations as needed.</p>
+  </main>
+
+  <script>
+    const rows = Array.from(document.querySelectorAll('.transaction-row'));
+    let selectedTransaction = null;
+    let accountFrozen = false;
+
+    rows.forEach((row) => {
+      row.addEventListener('click', () => selectTransaction(row));
+      row.querySelector('input[type="radio"]').addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectTransaction(row);
+      });
+    });
+
+    function selectTransaction(row) {
+      rows.forEach((item) => {
+        item.classList.remove('selected');
+        item.querySelector('input[type="radio"]').checked = false;
+      });
+
+      row.classList.add('selected');
+      row.querySelector('input[type="radio"]').checked = true;
+
+      selectedTransaction = {
+        id: row.dataset.id,
+        merchant: row.dataset.merchant,
+        date: row.dataset.date,
+        location: row.dataset.location,
+        category: row.dataset.category,
+        amount: row.dataset.amount,
+        status: row.dataset.status
+      };
+
+      document.getElementById('selectedDrawer').classList.add('active');
+      document.getElementById('detailMerchant').textContent = selectedTransaction.merchant;
+      document.getElementById('detailDate').textContent = selectedTransaction.date;
+      document.getElementById('detailLocation').textContent = selectedTransaction.location;
+      document.getElementById('detailAmount').textContent = selectedTransaction.amount;
+    }
+
+    function toggleFreeze() {
+      accountFrozen = !accountFrozen;
+
+      const button = document.getElementById('freezeButton');
+      const banner = document.getElementById('freezeBanner');
+      const status = document.getElementById('accountStatus');
+
+      if (accountFrozen) {
+        button.textContent = 'Unfreeze account';
+        button.classList.add('frozen');
+        banner.classList.add('active');
+        status.textContent = 'Frozen';
+      } else {
+        button.textContent = 'Freeze account';
+        button.classList.remove('frozen');
+        banner.classList.remove('active');
+        status.textContent = 'Active';
+      }
+    }
+
+    function copyFreezeSummary() {
+      const transactionSummary = selectedTransaction
+        ? `Selected transaction ${selectedTransaction.id}: ${selectedTransaction.merchant}, ${selectedTransaction.amount}, ${selectedTransaction.date}, ${selectedTransaction.location}.`
+        : 'No transaction selected.';
+
+      const summary = `Customer Sam Law requested account freeze review. Current balance: $89.76. Account status: ${accountFrozen ? 'Frozen' : 'Active'}. Freeze scope: Payments & transfers. ${transactionSummary}`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(summary).then(() => alert('Freeze case summary copied.'));
+      } else {
+        const temp = document.createElement('textarea');
+        temp.value = summary;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        alert('Freeze case summary copied.');
+      }
+    }
+  </script>
+</body>
+</html>
