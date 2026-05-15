@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Health Appointment Pre-Registration</title>
+  <style>
+    :root {
+      --cone-teal: #007c89;
+      --cone-teal-dark: #005e66;
+      --cone-green: #78be20;
+      --cone-purple: #6f2c91;
+      --cone-blue: #003f63;
+      --cone-bg: #f4f8f8;
+      --cone-card: #ffffff;
+      --cone-border: #d8e4e5;
+      --cone-text: #263238;
+      --cone-muted: #607d8b;
+      --cone-warning: #fff4d6;
+      --cone-warning-border: #f3cf73;
+      --cone-danger: #b3261e;
+      --cone-danger-soft: #fdebea;
+      --cone-success-soft: #edf8df;
+      --cone-info: #e7f0f5;
+      --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef8f7 0%, #f8fbf6 48%, #f6f1fa 100%);
+      color: var(--cone-text);
+    }
+
+    .pre-reg-page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 30% 30%, var(--cone-green) 0 22%, transparent 23%),
+        radial-gradient(circle at 70% 30%, var(--cone-purple) 0 20%, transparent 21%),
+        radial-gradient(circle at 48% 70%, var(--cone-teal) 0 27%, transparent 28%),
+        #e8f4f3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 124, 137, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--cone-teal-dark);
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--cone-muted);
+      font-size: 14px;
+    }
+
+    .call-status {
+      text-align: right;
+      font-size: 14px;
+      color: var(--cone-muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cone-teal-dark);
+      background: #e6f5f4;
+      border: 1px solid #b8dddd;
+      margin-bottom: 6px;
+    }
+
+    .pill.warning {
+      color: #6a4c00;
+      background: var(--cone-warning);
+      border-color: var(--cone-warning-border);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--cone-green);
+      border-radius: 999px;
+      box-shadow: 0 0 0 4px rgba(120, 190, 32, 0.18);
+    }
+
+    .warning .status-dot {
+      background: #d49400;
+      box-shadow: 0 0 0 4px rgba(212, 148, 0, 0.18);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--cone-border);
+      border-radius: 15px;
+      background: #fbfdfd;
+      padding: 13px;
+      box-shadow: 0 6px 15px rgba(0, 94, 102, 0.06);
+    }
+
+    .metric.warning {
+      background: var(--cone-warning);
+      border-color: var(--cone-warning-border);
+    }
+
+    .metric.success {
+      background: var(--cone-success-soft);
+      border-color: #cce8a7;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--cone-muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      color: var(--cone-teal-dark);
+      font-size: 15px;
+    }
+
+    .metric.warning strong {
+      color: #6a4c00;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cone-border);
+      background: #fbfdfd;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--cone-teal-dark);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      color: #ffffff;
+      background: var(--cone-blue);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section-tag.warning {
+      background: #8a6500;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
+    }
+
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d7d9;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      color: var(--cone-text);
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--cone-teal);
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .question-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .question-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
+      padding: 13px;
+      background: #ffffff;
+    }
+
+    .question-item.complete {
+      border-left-color: var(--cone-green);
+    }
+
+    .question-item.warning {
+      border-left-color: #d49400;
+      background: #fffdf5;
+      border-top-color: var(--cone-warning-border);
+      border-right-color: var(--cone-warning-border);
+      border-bottom-color: var(--cone-warning-border);
+    }
+
+    .question-title {
+      font-weight: 700;
+      color: var(--cone-text);
+      margin-bottom: 4px;
+    }
+
+    .question-answer {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 120px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.complete {
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border: 1px solid #cce8a7;
+    }
+
+    .badge.incomplete {
+      background: var(--cone-warning);
+      color: #6a4c00;
+      border: 1px solid var(--cone-warning-border);
+    }
+
+    .badge.info {
+      background: var(--cone-info);
+      color: var(--cone-blue);
+      border: 1px solid #bad0dd;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      border: 1px solid #bad9dc;
+      background: #ffffff;
+      color: var(--cone-teal-dark);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: var(--cone-teal);
+      color: #ffffff;
+      border-color: var(--cone-teal);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .action-card {
+      border: 1px solid var(--cone-warning-border);
+      border-left: 5px solid #d49400;
+      border-radius: 15px;
+      padding: 14px;
+      background: #fffdf5;
+      margin-bottom: 12px;
+    }
+
+    .action-card h3 {
+      margin: 0 0 7px;
+      color: #6a4c00;
+      font-size: 15px;
+    }
+
+    .action-card p {
+      margin: 0;
+      color: #5a4300;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.warning {
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      border: 0;
+      background: var(--cone-teal);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: #eaf4f5;
+      color: var(--cone-teal-dark);
+      border: 1px solid #bad9dc;
+    }
+
+    button.warning {
+      background: var(--cone-warning);
+      color: #6a4c00;
+      border: 1px solid var(--cone-warning-border);
+    }
+
+    .note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .pre-reg-page {
+        padding: 14px;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .call-status {
+        text-align: left;
+      }
+
+      .form-grid,
+      .question-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="pre-reg-page">
+    <header class="top-bar" aria-label="Cone Health appointment pre-registration header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Cone Health Appointment Pre-Registration</h1>
+          <p>Genesys Cloud agent view | Colonoscopy readiness and patient instructions</p>
+        </div>
+      </div>
+      <div class="call-status">
+        <div class="pill warning"><span class="status-dot"></span>Pre-Reg Follow-up Needed</div>
+        <div>Patient: Allison Law | DOB: 01/01/1980 | MRN: CH-5091842</div>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Pre-registration summary">
+      <div class="metric success">
+        <span>Pre-Registration</span>
+        <strong>Questions Completed</strong>
+      </div>
+      <div class="metric">
+        <span>Procedure</span>
+        <strong>Colonoscopy</strong>
+      </div>
+      <div class="metric">
+        <span>Appointment</span>
+        <strong>May 22, 2026 at 3:00 PM</strong>
+      </div>
+      <div class="metric warning">
+        <span>Outstanding Item</span>
+        <strong>Prep Instructions Needed</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-label="Patient and appointment information">
+        <div class="card-header">
+          <h2>Patient & Appointment Details</h2>
+          <span class="section-tag">Registration</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Agent opening:</strong> Thank you for calling Cone Health, I am reviewing your appointment pre-registration and procedure readiness details.
+          </div>
+
+          <form id="preRegForm">
+            <div class="form-grid">
+              <div>
+                <label for="firstName">First Name</label>
+                <input id="firstName" name="firstName" type="text" value="Allison" />
+              </div>
+
+              <div>
+                <label for="lastName">Last Name</label>
+                <input id="lastName" name="lastName" type="text" value="Law" />
+              </div>
+
+              <div>
+                <label for="dob">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="1980-01-01" />
+              </div>
+
+              <div>
+                <label for="phone">Primary Phone</label>
+                <input id="phone" name="phone" type="tel" value="000-555-0134" />
+              </div>
+
+              <div>
+                <label for="procedure">Procedure</label>
+                <input id="procedure" name="procedure" type="text" value="Colonoscopy" />
+              </div>
+
+              <div>
+                <label for="appointmentDateTime">Appointment Date & Time</label>
+                <input id="appointmentDateTime" name="appointmentDateTime" type="text" value="May 22, 2026 at 3:00 PM" />
+              </div>
+
+              <div>
+                <label for="appointmentStatus">Appointment Status</label>
+                <select id="appointmentStatus" name="appointmentStatus">
+                  <option selected>Scheduled</option>
+                  <option>Needs Reschedule</option>
+                  <option>Cancelled</option>
+                  <option>Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="preRegStatus">Pre-Registration Status</label>
+                <select id="preRegStatus" name="preRegStatus">
+                  <option selected>Completed - follow-up item open</option>
+                  <option>Not Started</option>
+                  <option>In Progress</option>
+                  <option>Completed - no follow-up needed</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="agentNotes">Agent Notes</label>
+                <textarea id="agentNotes" name="agentNotes">Patient has completed pre-registration questions. Patient has not yet received pre-treatment instructions and food guide for colonoscopy preparation.</textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="button" onclick="savePreRegSummary()">Save Pre-Reg Summary</button>
+              <button class="secondary" type="button" onclick="copyPreRegSummary()">Copy Summary</button>
+              <button class="warning" type="button" onclick="markInstructionsSent()">Mark Instructions Sent</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Completed pre-registration questions">
+        <div class="card-header">
+          <h2>Completed Pre-Registration Questions</h2>
+          <span class="section-tag">Review</span>
+        </div>
+        <div class="card-body">
+          <div class="alert">
+            Review completed answers with the patient and confirm whether any responses require routing to the clinical team before the colonoscopy appointment.
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Pre-registration question tabs">
+            <button class="tab-button active" type="button" data-tab="clinical">Clinical</button>
+            <button class="tab-button" type="button" data-tab="transportation">Transportation</button>
+            <button class="tab-button" type="button" data-tab="instructions">Instructions</button>
+            <button class="tab-button" type="button" data-tab="workflow">Agent Workflow</button>
+          </div>
+
+          <div id="clinical" class="tab-panel active">
+            <ul class="question-list">
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Currently experiencing symptoms?</div>
+                  <div class="question-answer">Yes. Patient reports active symptoms at time of pre-registration review.</div>
+                </div>
+                <span class="badge complete">Completed</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Abdominal pain?</div>
+                  <div class="question-answer">Yes. Patient reports abdominal pain.</div>
+                </div>
+                <span class="badge complete">Completed</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Change in bathroom habits?</div>
+                  <div class="question-answer">Yes. Patient reports a change in bathroom habits.</div>
+                </div>
+                <span class="badge complete">Completed</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Clinical review needed?</div>
+                  <div class="question-answer">Recommended. Symptom responses should be visible for clinical review before procedure date.</div>
+                </div>
+                <span class="badge info">Review</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="transportation" class="tab-panel">
+            <ul class="question-list">
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Guardian or responsible adult available?</div>
+                  <div class="question-answer">Yes. Patient has a guardian/responsible adult available to bring her to the appointment.</div>
+                </div>
+                <span class="badge complete">Completed</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Driver available after procedure?</div>
+                  <div class="question-answer">Yes. Guardian/responsible adult will drive patient home after the colonoscopy.</div>
+                </div>
+                <span class="badge complete">Completed</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Transportation readiness</div>
+                  <div class="question-answer">Transportation requirement appears complete based on patient response.</div>
+                </div>
+                <span class="badge complete">Ready</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="instructions" class="tab-panel">
+            <div class="action-card">
+              <h3>Outstanding Action: Send Prep Materials</h3>
+              <p>Patient has not yet received pre-treatment instructions or the food guide. Confirm preferred delivery method and send approved colonoscopy preparation materials.</p>
+            </div>
+
+            <ul class="question-list">
+              <li class="question-item warning">
+                <div>
+                  <div class="question-title">Pre-treatment instructions received?</div>
+                  <div class="question-answer">No. Patient has not yet received pre-treatment instructions.</div>
+                </div>
+                <span class="badge incomplete">Needed</span>
+              </li>
+
+              <li class="question-item warning">
+                <div>
+                  <div class="question-title">Food guide received?</div>
+                  <div class="question-answer">No. Patient has not yet received the food guide for procedure preparation.</div>
+                </div>
+                <span class="badge incomplete">Needed</span>
+              </li>
+
+              <li class="question-item complete" id="deliveryStatusItem">
+                <div>
+                  <div class="question-title">Preferred delivery method</div>
+                  <div class="question-answer" id="deliveryStatusText">Confirm whether patient wants materials sent by MyChart, email, mail, or verbally reviewed during the call.</div>
+                </div>
+                <span class="badge info" id="deliveryStatusBadge">Confirm</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="workflow" class="tab-panel">
+            <ul class="question-list">
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Step 1: Verify patient identity</div>
+                  <div class="question-answer">Confirm Allison Law, DOB 01/01/1980, and callback number before discussing appointment details.</div>
+                </div>
+                <span class="badge complete">Done</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Step 2: Review appointment</div>
+                  <div class="question-answer">Confirm colonoscopy appointment on May 22, 2026 at 3:00 PM.</div>
+                </div>
+                <span class="badge complete">Done</span>
+              </li>
+
+              <li class="question-item complete">
+                <div>
+                  <div class="question-title">Step 3: Review completed questions</div>
+                  <div class="question-answer">Symptoms, abdominal pain, bathroom habit changes, and transportation responses are captured.</div>
+                </div>
+                <span class="badge complete">Done</span>
+              </li>
+
+              <li class="question-item warning">
+                <div>
+                  <div class="question-title">Step 4: Send missing prep materials</div>
+                  <div class="question-answer">Send pre-treatment instructions and food guide using approved Cone Health materials and document delivery.</div>
+                </div>
+                <span class="badge incomplete">Open</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-button');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+
+        tabs.forEach((button) => button.classList.remove('active'));
+        panels.forEach((panel) => panel.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    function savePreRegSummary() {
+      const summary = buildSummary();
+      console.log('Genesys Cloud pre-registration payload:', summary);
+      alert('Pre-registration summary saved to console. Connect this action to a Genesys Cloud data action or script variable in production.');
+    }
+
+    function buildSummary() {
+      return {
+        patientName: 'Allison Law',
+        dob: '01/01/1980',
+        procedure: 'Colonoscopy',
+        appointmentDateTime: 'May 22, 2026 at 3:00 PM',
+        preRegistrationStatus: document.getElementById('preRegStatus').value,
+        completedQuestions: {
+          currentlyExperiencingSymptoms: 'Yes',
+          abdominalPain: 'Yes',
+          changeInBathroomHabits: 'Yes',
+          guardianToBringPatient: 'Yes',
+          driverAfterProcedure: 'Yes'
+        },
+        outstandingItems: {
+          preTreatmentInstructionsReceived: 'No',
+          foodGuideReceived: 'No'
+        },
+        notes: document.getElementById('agentNotes').value.trim(),
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    async function copyPreRegSummary() {
+      const summary = [
+        'Appointment Pre-Registration Summary',
+        'Patient: Allison Law',
+        'DOB: 01/01/1980',
+        'Procedure: Colonoscopy',
+        'Appointment: May 22, 2026 at 3:00 PM',
+        'Pre-registration questions: Completed',
+        'Currently experiencing symptoms: Yes',
+        'Abdominal pain: Yes',
+        'Change in bathroom habits: Yes',
+        'Guardian/responsible adult to bring patient: Yes',
+        'Guardian/responsible adult to drive patient home: Yes',
+        'Pre-treatment instructions received: No',
+        'Food guide received: No',
+        `Agent notes: ${document.getElementById('agentNotes').value.trim() || 'None entered'}`
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(summary);
+        alert('Pre-registration summary copied.');
+      } catch (error) {
+        alert('Copy failed. Please select and copy the pre-registration details manually.');
+      }
+    }
+
+    function markInstructionsSent() {
+      const deliveryText = document.getElementById('deliveryStatusText');
+      const deliveryBadge = document.getElementById('deliveryStatusBadge');
+      const deliveryItem = document.getElementById('deliveryStatusItem');
+      const notes = document.getElementById('agentNotes');
+
+      deliveryText.innerText = 'Prep materials marked as sent during this call. Confirm actual delivery channel in production workflow.';
+      deliveryBadge.innerText = 'Sent';
+      deliveryBadge.className = 'badge complete';
+      deliveryItem.classList.remove('warning');
+      deliveryItem.classList.add('complete');
+      notes.value = notes.value + '\nPrep instructions and food guide marked as sent during agent review.';
+    }
+  </script>
+</body>
+</html>
