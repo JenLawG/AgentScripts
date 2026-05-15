@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Health Pediatric Triage Escalation</title>
+  <style>
+    :root {
+      --cone-teal: #007c89;
+      --cone-teal-dark: #005e66;
+      --cone-green: #78be20;
+      --cone-purple: #6f2c91;
+      --cone-blue: #003f63;
+      --cone-bg: #f4f8f8;
+      --cone-card: #ffffff;
+      --cone-border: #d8e4e5;
+      --cone-text: #263238;
+      --cone-muted: #607d8b;
+      --cone-warning: #fff4d6;
+      --cone-warning-border: #f3cf73;
+      --cone-danger: #b3261e;
+      --cone-danger-soft: #fdebea;
+      --cone-info: #e7f0f5;
+      --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef8f7 0%, #f8fbf6 48%, #f6f1fa 100%);
+      color: var(--cone-text);
+    }
+
+    .triage-page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 30% 30%, var(--cone-green) 0 22%, transparent 23%),
+        radial-gradient(circle at 70% 30%, var(--cone-purple) 0 20%, transparent 21%),
+        radial-gradient(circle at 48% 70%, var(--cone-teal) 0 27%, transparent 28%),
+        #e8f4f3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 124, 137, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--cone-teal-dark);
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--cone-muted);
+      font-size: 14px;
+    }
+
+    .call-status {
+      text-align: right;
+      font-size: 14px;
+      color: var(--cone-muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cone-teal-dark);
+      background: #e6f5f4;
+      border: 1px solid #b8dddd;
+      margin-bottom: 6px;
+    }
+
+    .pill.urgent {
+      color: var(--cone-danger);
+      background: var(--cone-danger-soft);
+      border-color: #f5c6c3;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--cone-green);
+      border-radius: 999px;
+      box-shadow: 0 0 0 4px rgba(120, 190, 32, 0.18);
+    }
+
+    .urgent .status-dot {
+      background: var(--cone-danger);
+      box-shadow: 0 0 0 4px rgba(179, 38, 30, 0.18);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--cone-border);
+      border-radius: 15px;
+      background: #fbfdfd;
+      padding: 13px;
+      box-shadow: 0 6px 15px rgba(0, 94, 102, 0.06);
+    }
+
+    .metric.warning {
+      background: var(--cone-warning);
+      border-color: var(--cone-warning-border);
+    }
+
+    .metric.danger {
+      background: var(--cone-danger-soft);
+      border-color: #f5c6c3;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--cone-muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      color: var(--cone-teal-dark);
+      font-size: 15px;
+    }
+
+    .metric.danger strong {
+      color: var(--cone-danger);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cone-border);
+      background: #fbfdfd;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--cone-teal-dark);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      color: #ffffff;
+      background: var(--cone-blue);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section-tag.danger {
+      background: var(--cone-danger);
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
+    }
+
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .alert.danger {
+      border-color: #f5c6c3;
+      background: var(--cone-danger-soft);
+      color: var(--cone-danger);
+      font-weight: 700;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d7d9;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      color: var(--cone-text);
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--cone-teal);
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--cone-border);
+      border-radius: 14px;
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .check-item input {
+      width: auto;
+      margin-top: 3px;
+      accent-color: var(--cone-teal);
+    }
+
+    .check-item strong {
+      display: block;
+      font-size: 14px;
+      color: var(--cone-text);
+      margin-bottom: 3px;
+    }
+
+    .check-item span {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .workflow-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      border: 1px solid #bad9dc;
+      background: #ffffff;
+      color: var(--cone-teal-dark);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: var(--cone-teal);
+      color: #ffffff;
+      border-color: var(--cone-teal);
+    }
+
+    .workflow-panel {
+      display: none;
+      border: 1px solid var(--cone-border);
+      border-radius: 16px;
+      background: #ffffff;
+      padding: 15px;
+    }
+
+    .workflow-panel.active {
+      display: block;
+    }
+
+    .workflow-panel h3 {
+      margin: 0 0 10px;
+      color: var(--cone-teal-dark);
+      font-size: 16px;
+    }
+
+    .steps {
+      counter-reset: step-counter;
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      counter-increment: step-counter;
+      position: relative;
+      padding: 12px 12px 12px 48px;
+      border: 1px solid var(--cone-border);
+      border-radius: 13px;
+      background: #fbfdfd;
+      color: var(--cone-text);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .steps li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 13px;
+      top: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--cone-teal);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .steps li.urgent::before {
+      background: var(--cone-danger);
+    }
+
+    .decision-box {
+      border-left: 5px solid var(--cone-blue);
+      background: var(--cone-info);
+      border-radius: 14px;
+      padding: 14px 15px;
+      margin-top: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--cone-blue);
+      font-weight: 700;
+    }
+
+    .result-box {
+      border-radius: 16px;
+      border: 1px solid #bad9dc;
+      background: #fbfdfd;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .result-box h3 {
+      margin: 0 0 8px;
+      color: var(--cone-teal-dark);
+      font-size: 16px;
+    }
+
+    .result-box p {
+      margin: 0;
+      color: var(--cone-muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .result-box.high-risk {
+      border-color: #f5c6c3;
+      background: var(--cone-danger-soft);
+    }
+
+    .result-box.high-risk h3,
+    .result-box.high-risk p {
+      color: var(--cone-danger);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.danger {
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      border: 0;
+      background: var(--cone-teal);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: #eaf4f5;
+      color: var(--cone-teal-dark);
+      border: 1px solid #bad9dc;
+    }
+
+    button.danger {
+      background: var(--cone-danger-soft);
+      color: var(--cone-danger);
+      border: 1px solid #f5c6c3;
+    }
+
+    .note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .triage-page {
+        padding: 14px;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .call-status {
+        text-align: left;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="triage-page">
+    <header class="top-bar" aria-label="Cone Health pediatric triage escalation header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Cone Health Pediatric Triage Escalation</h1>
+          <p>Genesys Cloud nurse workflow | Fever and vomiting escalation</p>
+        </div>
+      </div>
+      <div class="call-status">
+        <div class="pill urgent"><span class="status-dot"></span>Triage Review Required</div>
+        <div>Patient: Sam Law | DOB: 08/08/2017 | MRN: CH-2048176</div>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Triage summary">
+      <div class="metric">
+        <span>Patient</span>
+        <strong>Sam Law</strong>
+      </div>
+      <div class="metric">
+        <span>Date of Birth</span>
+        <strong>08/08/2017</strong>
+      </div>
+      <div class="metric danger">
+        <span>Reported Temperature</span>
+        <strong>101.4°F</strong>
+      </div>
+      <div class="metric warning">
+        <span>Reported Symptom</span>
+        <strong>Vomiting</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-label="Triage intake information">
+        <div class="card-header">
+          <h2>Triage Intake</h2>
+          <span class="section-tag danger">Escalation</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Nurse opening:</strong> I understand Sam has a fever over 101 degrees and has been vomiting. I’m going to ask a few focused questions to determine the safest next step.
+          </div>
+
+          <div class="alert danger">
+            Use organizational triage protocols and clinical judgment. This page is a workflow mockup and should not replace approved clinical guidelines, standing orders, or emergency procedures.
+          </div>
+
+          <form id="triageForm">
+            <div class="form-grid">
+              <div>
+                <label for="patientName">Patient Name</label>
+                <input id="patientName" name="patientName" type="text" value="Sam Law" />
+              </div>
+
+              <div>
+                <label for="dob">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="2017-08-08" />
+              </div>
+
+              <div>
+                <label for="temperature">Highest Reported Temperature</label>
+                <input id="temperature" name="temperature" type="text" value="101.4°F" />
+              </div>
+
+              <div>
+                <label for="vomitingFrequency">Vomiting Frequency</label>
+                <select id="vomitingFrequency" name="vomitingFrequency">
+                  <option>1-2 episodes today</option>
+                  <option selected>3-5 episodes today</option>
+                  <option>More than 5 episodes today</option>
+                  <option>Unable to keep fluids down</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="symptomOnset">Symptom Onset</label>
+                <select id="symptomOnset" name="symptomOnset">
+                  <option>Less than 6 hours ago</option>
+                  <option selected>6-24 hours ago</option>
+                  <option>1-2 days ago</option>
+                  <option>More than 2 days ago</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="hydrationStatus">Hydration Concern</label>
+                <select id="hydrationStatus" name="hydrationStatus">
+                  <option selected>Drinking some fluids</option>
+                  <option>Reduced fluid intake</option>
+                  <option>No urine in 8+ hours</option>
+                  <option>Unable to keep fluids down</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="triageNotes">Nurse Notes</label>
+                <textarea id="triageNotes" name="triageNotes">Parent reports fever over 101°F and vomiting. No final disposition selected yet.</textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Clinical decision support workflow">
+        <div class="card-header">
+          <h2>Click-Through Workflow</h2>
+          <span class="section-tag">Next Steps</span>
+        </div>
+        <div class="card-body">
+          <div class="workflow-tabs" role="tablist" aria-label="Triage workflow options">
+            <button class="tab-button active" type="button" data-tab="redFlags">1. Red Flags</button>
+            <button class="tab-button" type="button" data-tab="assessment">2. Assessment</button>
+            <button class="tab-button" type="button" data-tab="disposition">3. Disposition</button>
+            <button class="tab-button" type="button" data-tab="education">4. Education</button>
+            <button class="tab-button" type="button" data-tab="handoff">5. Handoff</button>
+          </div>
+
+          <div id="redFlags" class="workflow-panel active">
+            <h3>Screen for Immediate Red Flags</h3>
+            <div class="checklist">
+              <label class="check-item">
+                <input type="checkbox" class="red-flag" value="Trouble breathing, blue lips, or severe weakness" />
+                <span><strong>Trouble breathing, blue lips, or severe weakness</strong>Escalate immediately if caregiver reports respiratory distress, cyanosis, severe lethargy, or difficulty waking.</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" class="red-flag" value="Signs of dehydration" />
+                <span><strong>Possible dehydration</strong>No urine for 8+ hours, very dry mouth, no tears, dizziness, or unable to keep fluids down.</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" class="red-flag" value="Stiff neck, confusion, severe headache, or persistent abdominal pain" />
+                <span><strong>Neurologic or severe pain symptoms</strong>Stiff neck, confusion, severe headache, severe abdominal pain, or worsening condition.</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" class="red-flag" value="Blood in vomit or green vomit" />
+                <span><strong>Concerning vomiting pattern</strong>Blood in vomit, green vomit, repeated vomiting, or signs the child cannot maintain hydration.</span>
+              </label>
+            </div>
+            <div class="decision-box">Click any red flag that applies. The recommendation panel updates automatically.</div>
+            <div id="riskResult" class="result-box">
+              <h3>Current Recommendation</h3>
+              <p>No red flags selected. Continue structured triage assessment and determine appropriate same-day care or clinician callback based on protocol.</p>
+            </div>
+          </div>
+
+          <div id="assessment" class="workflow-panel">
+            <h3>Focused Nurse Assessment</h3>
+            <ol class="steps">
+              <li>Verify patient identity, caregiver relationship, callback number, and current location in case urgent escalation is needed.</li>
+              <li>Confirm highest temperature, route used, time measured, and whether fever-reducing medication was given.</li>
+              <li>Assess vomiting frequency, last episode, ability to keep down small sips, and last urine output.</li>
+              <li>Ask about abdominal pain, headache, neck stiffness, rash, breathing concerns, diarrhea, exposure to illness, and recent travel.</li>
+              <li>Review age, relevant medical history, current medications, allergies, and immunization concerns from the EHR context.</li>
+            </ol>
+            <div class="decision-box">If assessment reveals worsening symptoms or inability to hydrate, move to urgent disposition or physician consult workflow.</div>
+          </div>
+
+          <div id="disposition" class="workflow-panel">
+            <h3>Example Disposition Options</h3>
+            <ol class="steps">
+              <li class="urgent"><strong>Emergency escalation:</strong> Advise emergency services or emergency department evaluation when red flags, respiratory distress, severe dehydration, altered mental status, or severe pain are reported.</li>
+              <li><strong>Same-day pediatric evaluation:</strong> Route to available pediatric clinic, urgent care, or same-day appointment when fever and vomiting continue but no emergency red flags are present.</li>
+              <li><strong>Provider callback:</strong> Send high-priority callback task when symptoms are concerning, caregiver is uncertain, or clinical protocol requires provider review.</li>
+              <li><strong>Home care with follow-up:</strong> Use only when permitted by protocol, red flags are absent, child is stable, and caregiver understands return precautions.</li>
+            </ol>
+            <div class="actions">
+              <button class="danger" type="button" onclick="setDisposition('Emergency escalation recommended based on selected red flags or nurse judgment.')">Select Emergency Escalation</button>
+              <button class="primary" type="button" onclick="setDisposition('Same-day pediatric evaluation recommended.')">Select Same-Day Evaluation</button>
+              <button class="secondary" type="button" onclick="setDisposition('Provider callback task created for pediatric triage review.')">Select Provider Callback</button>
+            </div>
+          </div>
+
+          <div id="education" class="workflow-panel">
+            <h3>Caregiver Education Prompts</h3>
+            <ol class="steps">
+              <li>Explain the selected disposition clearly and confirm the caregiver understands where to go or who will call back.</li>
+              <li>Review return precautions using approved organizational language, including worsening condition, dehydration signs, breathing trouble, severe pain, confusion, or persistent vomiting.</li>
+              <li>Confirm caregiver has transportation, access to the patient portal, and a reliable callback number.</li>
+              <li>Document questions asked, caregiver responses, selected disposition, and any handoff instructions.</li>
+            </ol>
+            <div class="decision-box">Do not provide medication dosing, diagnosis, or treatment instructions outside approved triage protocols.</div>
+          </div>
+
+          <div id="handoff" class="workflow-panel">
+            <h3>Escalation Handoff</h3>
+            <ol class="steps">
+              <li>Summarize: “Sam Law, DOB 08/08/2017, fever over 101°F with vomiting, symptom onset 6-24 hours ago.”</li>
+              <li>Include selected red flags, hydration status, vomiting frequency, temperature details, and caregiver callback number.</li>
+              <li>Route to the selected queue: pediatric nurse triage, same-day appointment scheduling, on-call provider, or emergency escalation support.</li>
+              <li>Close the loop by documenting the final disposition and confirming caregiver instructions.</li>
+            </ol>
+            <div class="actions">
+              <button class="primary" type="button" onclick="copyHandoff()">Copy Handoff Summary</button>
+              <button class="secondary" type="button" onclick="window.print()">Print Triage Summary</button>
+            </div>
+          </div>
+
+          <div id="selectedDisposition" class="result-box">
+            <h3>Selected Disposition</h3>
+            <p>No disposition selected yet.</p>
+          </div>
+
+          <p class="note">Prototype page only. In production, connect selections to Genesys Cloud script variables, queue routing, secure documentation workflows, and approved clinical triage protocols.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const workflowPanels = document.querySelectorAll('.workflow-panel');
+    const redFlags = document.querySelectorAll('.red-flag');
+    const riskResult = document.getElementById('riskResult');
+    const selectedDisposition = document.getElementById('selectedDisposition');
+
+    tabButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = button.getAttribute('data-tab');
+
+        tabButtons.forEach((tab) => tab.classList.remove('active'));
+        workflowPanels.forEach((panel) => panel.classList.remove('active'));
+
+        button.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    redFlags.forEach((checkbox) => {
+      checkbox.addEventListener('change', updateRiskRecommendation);
+    });
+
+    function updateRiskRecommendation() {
+      const selectedFlags = Array.from(redFlags).filter((flag) => flag.checked).map((flag) => flag.value);
+
+      if (selectedFlags.length > 0) {
+        riskResult.classList.add('high-risk');
+        riskResult.innerHTML = `
+          <h3>High-Risk Finding Selected</h3>
+          <p>Selected concern(s): ${selectedFlags.join('; ')}. Follow approved emergency escalation protocol or immediate clinician consultation based on nurse judgment and organizational policy.</p>
+        `;
+      } else {
+        riskResult.classList.remove('high-risk');
+        riskResult.innerHTML = `
+          <h3>Current Recommendation</h3>
+          <p>No red flags selected. Continue structured triage assessment and determine appropriate same-day care or clinician callback based on protocol.</p>
+        `;
+      }
+    }
+
+    function setDisposition(message) {
+      selectedDisposition.innerHTML = `
+        <h3>Selected Disposition</h3>
+        <p>${message}</p>
+      `;
+      selectedDisposition.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function copyHandoff() {
+      const selectedFlags = Array.from(redFlags).filter((flag) => flag.checked).map((flag) => flag.value);
+      const vomitingFrequency = document.getElementById('vomitingFrequency').value;
+      const symptomOnset = document.getElementById('symptomOnset').value;
+      const hydrationStatus = document.getElementById('hydrationStatus').value;
+      const temperature = document.getElementById('temperature').value;
+      const notes = document.getElementById('triageNotes').value.trim();
+      const disposition = selectedDisposition.querySelector('p').innerText;
+
+      const summary = [
+        'Pediatric Triage Handoff',
+        'Patient: Sam Law',
+        'DOB: 08/08/2017',
+        `Reported temperature: ${temperature}`,
+        `Vomiting frequency: ${vomitingFrequency}`,
+        `Symptom onset: ${symptomOnset}`,
+        `Hydration concern: ${hydrationStatus}`,
+        `Selected red flags: ${selectedFlags.length ? selectedFlags.join('; ') : 'None selected'}`,
+        `Disposition: ${disposition}`,
+        `Nurse notes: ${notes || 'None entered'}`
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(summary);
+        alert('Triage handoff summary copied.');
+      } catch (error) {
+        alert('Copy failed. Please select and copy the triage details manually.');
+      }
+    }
+  </script>
+</body>
+</html>
