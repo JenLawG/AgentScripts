@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Health Medical Records Request</title>
+  <style>
+    :root {
+      --cone-teal: #007c89;
+      --cone-teal-dark: #005e66;
+      --cone-green: #78be20;
+      --cone-purple: #6f2c91;
+      --cone-blue: #003f63;
+      --cone-bg: #f4f8f8;
+      --cone-card: #ffffff;
+      --cone-border: #d8e4e5;
+      --cone-text: #263238;
+      --cone-muted: #607d8b;
+      --cone-warning: #fff4d6;
+      --cone-warning-border: #f3cf73;
+      --cone-danger: #b3261e;
+      --cone-danger-soft: #fdebea;
+      --cone-success-soft: #edf8df;
+      --cone-info: #e7f0f5;
+      --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef8f7 0%, #f8fbf6 48%, #f6f1fa 100%);
+      color: var(--cone-text);
+    }
+
+    .records-page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 30% 30%, var(--cone-green) 0 22%, transparent 23%),
+        radial-gradient(circle at 70% 30%, var(--cone-purple) 0 20%, transparent 21%),
+        radial-gradient(circle at 48% 70%, var(--cone-teal) 0 27%, transparent 28%),
+        #e8f4f3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 124, 137, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--cone-teal-dark);
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--cone-muted);
+      font-size: 14px;
+    }
+
+    .call-status {
+      text-align: right;
+      font-size: 14px;
+      color: var(--cone-muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cone-teal-dark);
+      background: #e6f5f4;
+      border: 1px solid #b8dddd;
+      margin-bottom: 6px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--cone-green);
+      border-radius: 999px;
+      box-shadow: 0 0 0 4px rgba(120, 190, 32, 0.18);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--cone-border);
+      border-radius: 15px;
+      background: #fbfdfd;
+      padding: 13px;
+      box-shadow: 0 6px 15px rgba(0, 94, 102, 0.06);
+    }
+
+    .metric.success {
+      background: var(--cone-success-soft);
+      border-color: #cce8a7;
+    }
+
+    .metric.warning {
+      background: var(--cone-warning);
+      border-color: var(--cone-warning-border);
+    }
+
+    .metric.info {
+      background: var(--cone-info);
+      border-color: #bad0dd;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--cone-muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      color: var(--cone-teal-dark);
+      font-size: 15px;
+    }
+
+    .metric.warning strong {
+      color: #6a4c00;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cone-border);
+      background: #fbfdfd;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--cone-teal-dark);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      color: #ffffff;
+      background: var(--cone-blue);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section-tag.warning {
+      background: #8a6500;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
+    }
+
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--cone-danger);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d7d9;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      color: var(--cone-text);
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--cone-teal);
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      border: 1px solid #bad9dc;
+      background: #ffffff;
+      color: var(--cone-teal-dark);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-button.active {
+      background: var(--cone-teal);
+      color: #ffffff;
+      border-color: var(--cone-teal);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .request-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .request-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
+      padding: 13px;
+      background: #ffffff;
+    }
+
+    .request-item.success {
+      border-left-color: var(--cone-green);
+    }
+
+    .request-item.warning {
+      border-left-color: #d49400;
+      background: #fffdf5;
+      border-top-color: var(--cone-warning-border);
+      border-right-color: var(--cone-warning-border);
+      border-bottom-color: var(--cone-warning-border);
+    }
+
+    .request-title {
+      font-weight: 700;
+      color: var(--cone-text);
+      margin-bottom: 4px;
+    }
+
+    .request-answer {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 112px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.ready {
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border: 1px solid #cce8a7;
+    }
+
+    .badge.info {
+      background: var(--cone-info);
+      color: var(--cone-blue);
+      border: 1px solid #bad0dd;
+    }
+
+    .badge.warning {
+      background: var(--cone-warning);
+      color: #6a4c00;
+      border: 1px solid var(--cone-warning-border);
+    }
+
+    .badge.danger {
+      background: var(--cone-danger-soft);
+      color: var(--cone-danger);
+      border: 1px solid #f5c6c3;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.primary,
+    button.secondary,
+    button.warning {
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      border: 0;
+      background: var(--cone-teal);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: #eaf4f5;
+      color: var(--cone-teal-dark);
+      border: 1px solid #bad9dc;
+    }
+
+    button.warning {
+      background: var(--cone-warning);
+      color: #6a4c00;
+      border: 1px solid var(--cone-warning-border);
+    }
+
+    .confirmation {
+      display: none;
+      border: 1px solid #cce8a7;
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border-radius: 15px;
+      padding: 14px;
+      margin-top: 14px;
+      line-height: 1.45;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .records-page {
+        padding: 14px;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .call-status {
+        text-align: left;
+      }
+
+      .form-grid,
+      .request-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="records-page">
+    <header class="top-bar" aria-label="Cone Health medical records request header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Cone Health Medical Records Request</h1>
+          <p>Genesys Cloud agent view | Release of information and request tracking</p>
+        </div>
+      </div>
+      <div class="call-status">
+        <div class="pill"><span class="status-dot"></span>Records Request Intake</div>
+        <div>Patient: Allison Law | DOB: 01/01/1980 | MRN: CH-5091842</div>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Medical records request summary">
+      <div class="metric info">
+        <span>Request Type</span>
+        <strong id="summaryRequestType">Patient Copy</strong>
+      </div>
+      <div class="metric">
+        <span>Records Requested</span>
+        <strong id="summaryRecords">Visit Notes, Labs</strong>
+      </div>
+      <div class="metric warning">
+        <span>Authorization</span>
+        <strong id="summaryAuth">Needs Signature</strong>
+      </div>
+      <div class="metric success">
+        <span>Delivery Method</span>
+        <strong id="summaryDelivery">MyChart</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-label="Patient and request information">
+        <div class="card-header">
+          <h2>Request Intake</h2>
+          <span class="section-tag">Registration</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Agent opening:</strong> Thank you for calling Cone Health, I can help start a medical records request and review the information needed to process it.
+          </div>
+
+          <form id="recordsRequestForm">
+            <div class="form-grid">
+              <div>
+                <label for="firstName" class="required">First Name</label>
+                <input id="firstName" name="firstName" type="text" value="Allison" />
+              </div>
+
+              <div>
+                <label for="lastName" class="required">Last Name</label>
+                <input id="lastName" name="lastName" type="text" value="Law" />
+              </div>
+
+              <div>
+                <label for="dob" class="required">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="1980-01-01" />
+              </div>
+
+              <div>
+                <label for="phone">Primary Phone</label>
+                <input id="phone" name="phone" type="tel" value="000-555-0134" />
+              </div>
+
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" value="allison.law@example.com" />
+              </div>
+
+              <div>
+                <label for="requestorRelationship" class="required">Requestor Relationship</label>
+                <select id="requestorRelationship" name="requestorRelationship">
+                  <option selected>Self / Patient</option>
+                  <option>Parent or Legal Guardian</option>
+                  <option>Healthcare Provider</option>
+                  <option>Attorney</option>
+                  <option>Insurance Company</option>
+                  <option>Other Authorized Representative</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="requestType" class="required">Request Type</label>
+                <select id="requestType" name="requestType">
+                  <option selected>Patient Copy</option>
+                  <option>Send to Provider</option>
+                  <option>Legal / Attorney Request</option>
+                  <option>Insurance Request</option>
+                  <option>Disability or FMLA Support</option>
+                  <option>Amendment or Correction Request</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="deliveryMethod" class="required">Delivery Method</label>
+                <select id="deliveryMethod" name="deliveryMethod">
+                  <option selected>MyChart</option>
+                  <option>Secure Email</option>
+                  <option>Mail to Home Address</option>
+                  <option>Fax to Provider</option>
+                  <option>Pickup at Facility</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="dateRangeStart">Records From</label>
+                <input id="dateRangeStart" name="dateRangeStart" type="date" value="2025-01-01" />
+              </div>
+
+              <div>
+                <label for="dateRangeEnd">Records Through</label>
+                <input id="dateRangeEnd" name="dateRangeEnd" type="date" value="2026-05-15" />
+              </div>
+
+              <div class="full">
+                <label for="recordTypes" class="required">Records Requested</label>
+                <select id="recordTypes" name="recordTypes">
+                  <option selected>Visit Notes and Lab Results</option>
+                  <option>Full Medical Record</option>
+                  <option>Imaging Reports</option>
+                  <option>Billing Records</option>
+                  <option>Medication List</option>
+                  <option>Immunization Record</option>
+                  <option>Operative or Procedure Reports</option>
+                  <option>Discharge Summary</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="destination">Recipient / Destination</label>
+                <input id="destination" name="destination" type="text" value="Allison Law - MyChart account" />
+              </div>
+
+              <div class="full">
+                <label for="agentNotes">Agent Notes</label>
+                <textarea id="agentNotes" name="agentNotes">Patient is requesting a personal copy of visit notes and lab results from 2025 through current date. Authorization signature still required before release.</textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="button" onclick="submitRecordsRequest()">Submit Request</button>
+              <button class="secondary" type="button" onclick="copyRequestSummary()">Copy Request Summary</button>
+              <button class="warning" type="button" onclick="markAuthorizationReceived()">Mark Authorization Received</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Medical records workflow">
+        <div class="card-header">
+          <h2>Records Workflow</h2>
+          <span class="section-tag">Release of Information</span>
+        </div>
+        <div class="card-body">
+          <div class="alert">
+            Verify identity and authorization before discussing, releasing, or routing protected health information. Use approved Cone Health release-of-information workflows for production processing.
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Medical records workflow tabs">
+            <button class="tab-button active" type="button" data-tab="verification">Verification</button>
+            <button class="tab-button" type="button" data-tab="records">Records</button>
+            <button class="tab-button" type="button" data-tab="delivery">Delivery</button>
+            <button class="tab-button" type="button" data-tab="tasks">Agent Tasks</button>
+          </div>
+
+          <div id="verification" class="tab-panel active">
+            <ul class="request-list">
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Patient Identity</div>
+                  <div class="request-answer">Allison Law, DOB 01/01/1980, phone 000-555-0134.</div>
+                </div>
+                <span class="badge ready">Verified</span>
+              </li>
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Requestor Relationship</div>
+                  <div class="request-answer">Requestor is the patient requesting her own records.</div>
+                </div>
+                <span class="badge ready">Self</span>
+              </li>
+              <li class="request-item warning" id="authorizationItem">
+                <div>
+                  <div class="request-title">Authorization Form</div>
+                  <div class="request-answer" id="authorizationText">Signature has not been received yet. Send form or collect through approved electronic workflow.</div>
+                </div>
+                <span class="badge warning" id="authorizationBadge">Needed</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="records" class="tab-panel">
+            <ul class="request-list">
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Record Type</div>
+                  <div class="request-answer" id="recordTypeReview">Visit Notes and Lab Results</div>
+                </div>
+                <span class="badge info">Selected</span>
+              </li>
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Date Range</div>
+                  <div class="request-answer" id="dateRangeReview">01/01/2025 through 05/15/2026</div>
+                </div>
+                <span class="badge info">Range</span>
+              </li>
+              <li class="request-item">
+                <div>
+                  <div class="request-title">Sensitive Information Check</div>
+                  <div class="request-answer">Review whether the selected record set requires additional authorization or special handling before release.</div>
+                </div>
+                <span class="badge warning">Review</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="delivery" class="tab-panel">
+            <ul class="request-list">
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Delivery Method</div>
+                  <div class="request-answer" id="deliveryReview">MyChart</div>
+                </div>
+                <span class="badge ready">Preferred</span>
+              </li>
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Recipient / Destination</div>
+                  <div class="request-answer" id="destinationReview">Allison Law - MyChart account</div>
+                </div>
+                <span class="badge info">Destination</span>
+              </li>
+              <li class="request-item warning">
+                <div>
+                  <div class="request-title">Estimated Processing</div>
+                  <div class="request-answer">Provide only approved processing expectations and avoid guaranteeing release timing until authorization and review are complete.</div>
+                </div>
+                <span class="badge warning">Pending</span>
+              </li>
+            </ul>
+          </div>
+
+          <div id="tasks" class="tab-panel">
+            <ul class="request-list">
+              <li class="request-item success">
+                <div>
+                  <div class="request-title">Step 1: Verify Identity</div>
+                  <div class="request-answer">Confirm patient name, date of birth, callback number, and relationship to request.</div>
+                </div>
+                <span class="badge ready">Done</span>
+              </li>
+              <li class="request-item warning">
+                <div>
+                  <div class="request-title">Step 2: Complete Authorization</div>
+                  <div class="request-answer">Send or collect the required authorization signature before releasing records.</div>
+                </div>
+                <span class="badge warning">Open</span>
+              </li>
+              <li class="request-item">
+                <div>
+                  <div class="request-title">Step 3: Route to Records Team</div>
+                  <div class="request-answer">Submit the request to the release-of-information work queue with record type, date range, delivery method, and notes.</div>
+                </div>
+                <span class="badge info">Next</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="confirmation" id="requestConfirmation">
+            Request has not been submitted yet.
+          </div>
+
+          <p class="note">Demo page only. Replace sample data with Genesys Cloud script variables, approved release-of-information workflows, and secure integrations before production use.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-button');
+    const panels = document.querySelectorAll('.tab-panel');
+    const requestType = document.getElementById('requestType');
+    const deliveryMethod = document.getElementById('deliveryMethod');
+    const recordTypes = document.getElementById('recordTypes');
+    const dateRangeStart = document.getElementById('dateRangeStart');
+    const dateRangeEnd = document.getElementById('dateRangeEnd');
+    const destination = document.getElementById('destination');
+    const requestConfirmation = document.getElementById('requestConfirmation');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+
+        tabs.forEach((button) => button.classList.remove('active'));
+        panels.forEach((panel) => panel.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    requestType.addEventListener('change', updateSummary);
+    deliveryMethod.addEventListener('change', updateSummary);
+    recordTypes.addEventListener('change', updateSummary);
+    dateRangeStart.addEventListener('change', updateSummary);
+    dateRangeEnd.addEventListener('change', updateSummary);
+    destination.addEventListener('input', updateSummary);
+
+    function formatDate(dateValue) {
+      if (!dateValue) return 'Not selected';
+      const parts = dateValue.split('-');
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
+
+    function updateSummary() {
+      document.getElementById('summaryRequestType').innerText = requestType.value;
+      document.getElementById('summaryDelivery').innerText = deliveryMethod.value;
+      document.getElementById('summaryRecords').innerText = recordTypes.value;
+      document.getElementById('recordTypeReview').innerText = recordTypes.value;
+      document.getElementById('dateRangeReview').innerText = `${formatDate(dateRangeStart.value)} through ${formatDate(dateRangeEnd.value)}`;
+      document.getElementById('deliveryReview').innerText = deliveryMethod.value;
+      document.getElementById('destinationReview').innerText = destination.value || 'Destination not entered';
+    }
+
+    function markAuthorizationReceived() {
+      document.getElementById('summaryAuth').innerText = 'Received';
+      document.getElementById('authorizationText').innerText = 'Authorization signature marked as received during this call. Confirm document storage and validation in production workflow.';
+      const badge = document.getElementById('authorizationBadge');
+      badge.innerText = 'Received';
+      badge.className = 'badge ready';
+      document.getElementById('authorizationItem').classList.remove('warning');
+      document.getElementById('authorizationItem').classList.add('success');
+    }
+
+    function buildRecordsRequestSummary() {
+      return {
+        patientName: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+        dob: '01/01/1980',
+        phone: document.getElementById('phone').value,
+        requestorRelationship: document.getElementById('requestorRelationship').value,
+        requestType: requestType.value,
+        recordTypes: recordTypes.value,
+        dateRange: `${formatDate(dateRangeStart.value)} through ${formatDate(dateRangeEnd.value)}`,
+        deliveryMethod: deliveryMethod.value,
+        destination: destination.value,
+        authorizationStatus: document.getElementById('summaryAuth').innerText,
+        notes: document.getElementById('agentNotes').value.trim(),
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function submitRecordsRequest() {
+      const summary = buildRecordsRequestSummary();
+      console.log('Genesys Cloud medical records request payload:', summary);
+      requestConfirmation.innerText = `Medical records request submitted for ${summary.patientName}: ${summary.recordTypes}, ${summary.dateRange}, delivery by ${summary.deliveryMethod}.`;
+      requestConfirmation.style.display = 'block';
+    }
+
+    async function copyRequestSummary() {
+      const summary = buildRecordsRequestSummary();
+      const text = [
+        'Medical Records Request Summary',
+        `Patient: ${summary.patientName}`,
+        `DOB: ${summary.dob}`,
+        `Phone: ${summary.phone}`,
+        `Requestor relationship: ${summary.requestorRelationship}`,
+        `Request type: ${summary.requestType}`,
+        `Records requested: ${summary.recordTypes}`,
+        `Date range: ${summary.dateRange}`,
+        `Delivery method: ${summary.deliveryMethod}`,
+        `Destination: ${summary.destination}`,
+        `Authorization status: ${summary.authorizationStatus}`,
+        `Agent notes: ${summary.notes || 'None entered'}`
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Medical records request summary copied.');
+      } catch (error) {
+        alert('Copy failed. Please select and copy the medical records request details manually.');
+      }
+    }
+  </script>
+</body>
+</html>
