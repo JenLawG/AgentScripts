@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cone Health Specialty Scheduling - Urology</title>
+  <style>
+    :root {
+      --cone-teal: #007c89;
+      --cone-teal-dark: #005e66;
+      --cone-green: #78be20;
+      --cone-purple: #6f2c91;
+      --cone-blue: #003f63;
+      --cone-bg: #f4f8f8;
+      --cone-card: #ffffff;
+      --cone-border: #d8e4e5;
+      --cone-text: #263238;
+      --cone-muted: #607d8b;
+      --cone-warning: #fff4d6;
+      --cone-warning-border: #f3cf73;
+      --cone-danger: #b3261e;
+      --cone-danger-soft: #fdebea;
+      --cone-success-soft: #edf8df;
+      --cone-info: #e7f0f5;
+      --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef8f7 0%, #f8fbf6 48%, #f6f1fa 100%);
+      color: var(--cone-text);
+    }
+
+    .scheduling-page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 30% 30%, var(--cone-green) 0 22%, transparent 23%),
+        radial-gradient(circle at 70% 30%, var(--cone-purple) 0 20%, transparent 21%),
+        radial-gradient(circle at 48% 70%, var(--cone-teal) 0 27%, transparent 28%),
+        #e8f4f3;
+      border: 2px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 124, 137, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--cone-teal-dark);
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--cone-muted);
+      font-size: 14px;
+    }
+
+    .call-status {
+      text-align: right;
+      font-size: 14px;
+      color: var(--cone-muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--cone-teal-dark);
+      background: #e6f5f4;
+      border: 1px solid #b8dddd;
+      margin-bottom: 6px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--cone-green);
+      border-radius: 999px;
+      box-shadow: 0 0 0 4px rgba(120, 190, 32, 0.18);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--cone-border);
+      border-radius: 15px;
+      background: #fbfdfd;
+      padding: 13px;
+      box-shadow: 0 6px 15px rgba(0, 94, 102, 0.06);
+    }
+
+    .metric.success {
+      background: var(--cone-success-soft);
+      border-color: #cce8a7;
+    }
+
+    .metric.info {
+      background: var(--cone-info);
+      border-color: #bad0dd;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--cone-muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      color: var(--cone-teal-dark);
+      font-size: 15px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--cone-card);
+      border: 1px solid var(--cone-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--cone-border);
+      background: #fbfdfd;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--cone-teal-dark);
+    }
+
+    .section-tag {
+      font-size: 12px;
+      color: #ffffff;
+      background: var(--cone-blue);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
+    }
+
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--cone-danger);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d7d9;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      color: var(--cone-text);
+      background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--cone-teal);
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .slot-button {
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .slot-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 94, 102, 0.08);
+    }
+
+    .slot-button.active {
+      border-color: var(--cone-teal);
+      background: #eef8f7;
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.10);
+    }
+
+    .slot-button strong {
+      display: block;
+      color: var(--cone-teal-dark);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .slot-button span {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .review-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .review-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
+      padding: 13px;
+      background: #ffffff;
+    }
+
+    .review-item.success {
+      border-left-color: var(--cone-green);
+    }
+
+    .review-title {
+      font-weight: 700;
+      color: var(--cone-text);
+      margin-bottom: 4px;
+    }
+
+    .review-answer {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 112px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.ready {
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border: 1px solid #cce8a7;
+    }
+
+    .badge.info {
+      background: var(--cone-info);
+      color: var(--cone-blue);
+      border: 1px solid #bad0dd;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button.primary,
+    button.secondary {
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      border: 0;
+      background: var(--cone-teal);
+      color: #ffffff;
+    }
+
+    button.secondary {
+      background: #eaf4f5;
+      color: var(--cone-teal-dark);
+      border: 1px solid #bad9dc;
+    }
+
+    .confirmation {
+      display: none;
+      border: 1px solid #cce8a7;
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border-radius: 15px;
+      padding: 14px;
+      margin-top: 14px;
+      line-height: 1.45;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .scheduling-page {
+        padding: 14px;
+      }
+
+      .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .call-status {
+        text-align: left;
+      }
+
+      .form-grid,
+      .slot-grid,
+      .review-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="scheduling-page">
+    <header class="top-bar" aria-label="Cone Health specialty scheduling header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <h1>Cone Health Specialty Scheduling</h1>
+          <p>Genesys Cloud agent view | Urology appointment booking</p>
+        </div>
+      </div>
+      <div class="call-status">
+        <div class="pill"><span class="status-dot"></span>Ready to Schedule</div>
+        <div>Patient: Allison Law | DOB: 01/01/1980 | MRN: CH-5091842</div>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="Scheduling summary">
+      <div class="metric success">
+        <span>Scheduling Use Case</span>
+        <strong>Specialty Appointment</strong>
+      </div>
+      <div class="metric info">
+        <span>Selected Specialty</span>
+        <strong id="summarySpecialty">Urology</strong>
+      </div>
+      <div class="metric">
+        <span>Insurance</span>
+        <strong id="summaryInsurance">Blue Shield</strong>
+      </div>
+      <div class="metric">
+        <span>Booking Status</span>
+        <strong id="summaryBookingStatus">Not Booked</strong>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-label="Patient information and specialty selection">
+        <div class="card-header">
+          <h2>Patient Information</h2>
+          <span class="section-tag">Registration</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Agent opening:</strong> Thank you for calling Cone Health, I can help review your information and schedule a specialty appointment.
+          </div>
+
+          <form id="schedulingForm">
+            <div class="form-grid">
+              <div>
+                <label for="firstName" class="required">First Name</label>
+                <input id="firstName" name="firstName" type="text" value="Allison" />
+              </div>
+
+              <div>
+                <label for="lastName" class="required">Last Name</label>
+                <input id="lastName" name="lastName" type="text" value="Law" />
+              </div>
+
+              <div>
+                <label for="dob" class="required">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="1980-01-01" />
+              </div>
+
+              <div>
+                <label for="phone">Primary Phone</label>
+                <input id="phone" name="phone" type="tel" value="000-555-0134" />
+              </div>
+
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" value="allison.law@example.com" />
+              </div>
+
+              <div>
+                <label for="preferredContact">Preferred Contact</label>
+                <select id="preferredContact" name="preferredContact">
+                  <option selected>Phone</option>
+                  <option>Text Message</option>
+                  <option>Email</option>
+                  <option>MyChart Message</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="insurancePlan" class="required">Insurance Plan</label>
+                <select id="insurancePlan" name="insurancePlan">
+                  <option>Aetna</option>
+                  <option selected>Blue Shield</option>
+                  <option>Blue Cross Blue Shield NC</option>
+                  <option>Cigna</option>
+                  <option>Humana</option>
+                  <option>Medicaid</option>
+                  <option>Medicare</option>
+                  <option>United Healthcare</option>
+                  <option>Self Pay</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="specialtyDepartment" class="required">Specialty Department</label>
+                <select id="specialtyDepartment" name="specialtyDepartment">
+                  <option selected>Urology</option>
+                  <option>Cardiology</option>
+                  <option>Oncology</option>
+                  <option>Gastroenterology</option>
+                  <option>Neurology</option>
+                  <option>Orthopedics</option>
+                  <option>Endocrinology</option>
+                  <option>Pulmonology</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="visitReason" class="required">Visit Reason</label>
+                <select id="visitReason" name="visitReason">
+                  <option selected>New patient urology consultation</option>
+                  <option>Follow-up appointment</option>
+                  <option>Procedure follow-up</option>
+                  <option>Referral review</option>
+                  <option>Second opinion</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="appointmentType">Appointment Type</label>
+                <select id="appointmentType" name="appointmentType">
+                  <option selected>In-person visit</option>
+                  <option>Virtual visit</option>
+                  <option>Phone consultation</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="schedulingNotes">Scheduling Notes</label>
+                <textarea id="schedulingNotes" name="schedulingNotes">Patient requesting specialty scheduling for urology. Referral is on file. Confirm preferred date, time, location, and provider availability before booking.</textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Appointment date and time booking">
+        <div class="card-header">
+          <h2>Choose Date & Time</h2>
+          <span class="section-tag">Booking</span>
+        </div>
+        <div class="card-body">
+          <div class="alert">
+            Select an available appointment slot, confirm department and visit reason, then click <strong>Book Appointment</strong>. In production, this action should connect to approved scheduling APIs or Genesys Cloud data actions.
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="preferredLocation">Preferred Location</label>
+              <select id="preferredLocation" name="preferredLocation">
+                <option selected>Cone Health Urology - Greensboro, NC</option>
+                <option>Cone Health Urology - Burlington, NC</option>
+                <option>Cone Health Specialty Care - Greensboro, NC</option>
+                <option>Cone Health Outpatient Center - High Point, NC</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="providerPreference">Provider Preference</label>
+              <select id="providerPreference" name="providerPreference">
+                <option selected>First available provider</option>
+                <option>Female provider preferred</option>
+                <option>Male provider preferred</option>
+                <option>Specific provider requested</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="appointmentDate" class="required">Appointment Date</label>
+              <input id="appointmentDate" name="appointmentDate" type="date" value="2026-06-02" />
+            </div>
+
+            <div>
+              <label for="appointmentTime" class="required">Appointment Time</label>
+              <input id="appointmentTime" name="appointmentTime" type="time" value="09:30" />
+            </div>
+          </div>
+
+          <label style="margin-top: 16px;">Available Urology Slots</label>
+          <div class="slot-grid" aria-label="Available appointment slots">
+            <button class="slot-button active" type="button" data-date="2026-06-02" data-time="09:30" data-label="Tuesday, June 2, 2026 at 9:30 AM">
+              <strong>Tue, Jun 2 · 9:30 AM</strong>
+              <span>Urology consult · Greensboro · First available provider</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-03" data-time="13:15" data-label="Wednesday, June 3, 2026 at 1:15 PM">
+              <strong>Wed, Jun 3 · 1:15 PM</strong>
+              <span>Urology consult · Burlington · First available provider</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-05" data-time="08:45" data-label="Friday, June 5, 2026 at 8:45 AM">
+              <strong>Fri, Jun 5 · 8:45 AM</strong>
+              <span>Urology consult · Greensboro · Morning availability</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-08" data-time="15:00" data-label="Monday, June 8, 2026 at 3:00 PM">
+              <strong>Mon, Jun 8 · 3:00 PM</strong>
+              <span>Urology consult · High Point · Afternoon availability</span>
+            </button>
+          </div>
+
+          <div class="actions">
+            <button class="primary" type="button" onclick="bookAppointment()">Book Appointment</button>
+            <button class="secondary" type="button" onclick="copyBookingSummary()">Copy Booking Summary</button>
+          </div>
+
+          <div class="confirmation" id="bookingConfirmation">
+            Appointment has not been booked yet.
+          </div>
+
+          <p class="note">Demo page only. Replace sample locations, provider availability, and static patient information with Genesys Cloud script variables and approved scheduling integrations before production use.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" aria-label="Booking review" style="margin-top: 18px;">
+      <div class="card-header">
+        <h2>Booking Review</h2>
+        <span class="section-tag">Summary</span>
+      </div>
+      <div class="card-body">
+        <ul class="review-list">
+          <li class="review-item success">
+            <div>
+              <div class="review-title">Patient Verified</div>
+              <div class="review-answer">Allison Law, DOB 01/01/1980, primary phone 000-555-0134.</div>
+            </div>
+            <span class="badge ready">Ready</span>
+          </li>
+          <li class="review-item success">
+            <div>
+              <div class="review-title">Insurance Verified</div>
+              <div class="review-answer" id="insuranceReviewText">Blue Shield selected for scheduling and eligibility review.</div>
+            </div>
+            <span class="badge ready">Selected</span>
+          </li>
+          <li class="review-item">
+            <div>
+              <div class="review-title">Selected Appointment</div>
+              <div class="review-answer" id="selectedAppointmentText">Tuesday, June 2, 2026 at 9:30 AM · Urology · Cone Health Urology - Greensboro, NC.</div>
+            </div>
+            <span class="badge info" id="bookingBadge">Pending</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const specialtyDepartment = document.getElementById('specialtyDepartment');
+    const summarySpecialty = document.getElementById('summarySpecialty');
+    const insurancePlan = document.getElementById('insurancePlan');
+    const summaryInsurance = document.getElementById('summaryInsurance');
+    const insuranceReviewText = document.getElementById('insuranceReviewText');
+    const slotButtons = document.querySelectorAll('.slot-button');
+    const appointmentDate = document.getElementById('appointmentDate');
+    const appointmentTime = document.getElementById('appointmentTime');
+    const selectedAppointmentText = document.getElementById('selectedAppointmentText');
+    const bookingConfirmation = document.getElementById('bookingConfirmation');
+    const bookingBadge = document.getElementById('bookingBadge');
+    const summaryBookingStatus = document.getElementById('summaryBookingStatus');
+
+    specialtyDepartment.addEventListener('change', () => {
+      summarySpecialty.innerText = specialtyDepartment.value;
+      updateSelectedAppointmentText();
+    });
+
+    insurancePlan.addEventListener('change', () => {
+      summaryInsurance.innerText = insurancePlan.value;
+      insuranceReviewText.innerText = `${insurancePlan.value} selected for scheduling and eligibility review.`;
+    });
+
+    document.getElementById('preferredLocation').addEventListener('change', updateSelectedAppointmentText);
+    appointmentDate.addEventListener('change', updateSelectedAppointmentText);
+    appointmentTime.addEventListener('change', updateSelectedAppointmentText);
+
+    slotButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        slotButtons.forEach((slot) => slot.classList.remove('active'));
+        button.classList.add('active');
+        appointmentDate.value = button.getAttribute('data-date');
+        appointmentTime.value = button.getAttribute('data-time');
+        selectedAppointmentText.innerText = `${button.getAttribute('data-label')} · ${specialtyDepartment.value} · ${document.getElementById('preferredLocation').value}.`;
+        bookingBadge.innerText = 'Pending';
+        bookingBadge.className = 'badge info';
+        summaryBookingStatus.innerText = 'Not Booked';
+        bookingConfirmation.style.display = 'none';
+      });
+    });
+
+    function updateSelectedAppointmentText() {
+      const formattedDate = appointmentDate.value || 'No date selected';
+      const formattedTime = appointmentTime.value || 'No time selected';
+      selectedAppointmentText.innerText = `${formattedDate} at ${formattedTime} · ${specialtyDepartment.value} · ${document.getElementById('preferredLocation').value}.`;
+      bookingBadge.innerText = 'Pending';
+      bookingBadge.className = 'badge info';
+      summaryBookingStatus.innerText = 'Not Booked';
+      bookingConfirmation.style.display = 'none';
+    }
+
+    function bookAppointment() {
+      const patientName = `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`;
+      const specialty = specialtyDepartment.value;
+      const location = document.getElementById('preferredLocation').value;
+      const date = appointmentDate.value;
+      const time = appointmentTime.value;
+
+      if (!date || !time || !specialty) {
+        alert('Please select a specialty department, appointment date, and appointment time before booking.');
+        return;
+      }
+
+      const confirmationText = `${patientName} is booked for ${specialty} on ${date} at ${time} at ${location}.`;
+      bookingConfirmation.innerText = confirmationText;
+      bookingConfirmation.style.display = 'block';
+      bookingBadge.innerText = 'Booked';
+      bookingBadge.className = 'badge ready';
+      summaryBookingStatus.innerText = 'Booked';
+    }
+
+    async function copyBookingSummary() {
+      const summary = [
+        'Specialty Scheduling Booking Summary',
+        `Patient: ${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+        'DOB: 01/01/1980',
+        `Specialty: ${specialtyDepartment.value}`,
+        `Insurance: ${insurancePlan.value}`,
+        `Visit reason: ${document.getElementById('visitReason').value}`,
+        `Appointment type: ${document.getElementById('appointmentType').value}`,
+        `Location: ${document.getElementById('preferredLocation').value}`,
+        `Provider preference: ${document.getElementById('providerPreference').value}`,
+        `Date: ${appointmentDate.value}`,
+        `Time: ${appointmentTime.value}`,
+        `Booking status: ${summaryBookingStatus.innerText}`,
+        `Notes: ${document.getElementById('schedulingNotes').value.trim() || 'None entered'}`
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(summary);
+        alert('Booking summary copied.');
+      } catch (error) {
+        alert('Copy failed. Please select and copy the booking details manually.');
+      }
+    }
+  </script>
+</body>
+</html>
