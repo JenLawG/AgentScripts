@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cone Health Pediatric Appointments</title>
+  <title>Cone Health Specialty Scheduling - Urology</title>
   <style>
     :root {
       --cone-teal: #007c89;
@@ -19,6 +19,9 @@
       --cone-warning: #fff4d6;
       --cone-warning-border: #f3cf73;
       --cone-danger: #b3261e;
+      --cone-danger-soft: #fdebea;
+      --cone-success-soft: #edf8df;
+      --cone-info: #e7f0f5;
       --shadow: 0 10px 25px rgba(0, 94, 102, 0.10);
       --radius: 18px;
     }
@@ -34,7 +37,7 @@
       color: var(--cone-text);
     }
 
-    .appointment-page {
+    .scheduling-page {
       max-width: 1280px;
       margin: 0 auto;
       padding: 24px;
@@ -129,6 +132,16 @@
       box-shadow: 0 6px 15px rgba(0, 94, 102, 0.06);
     }
 
+    .metric.success {
+      background: var(--cone-success-soft);
+      border-color: #cce8a7;
+    }
+
+    .metric.info {
+      background: var(--cone-info);
+      border-color: #bad0dd;
+    }
+
     .metric span {
       display: block;
       color: var(--cone-muted);
@@ -139,6 +152,12 @@
     .metric strong {
       color: var(--cone-teal-dark);
       font-size: 15px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
     }
 
     .card {
@@ -179,118 +198,160 @@
       padding: 18px;
     }
 
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+    .script-box {
+      border-left: 5px solid var(--cone-green);
+      background: #f7fbf0;
+      border-radius: 14px;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #334222;
+      margin-bottom: 14px;
     }
 
-    .filter-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    .alert {
+      border: 1px solid var(--cone-warning-border);
+      background: var(--cone-warning);
+      border-radius: 15px;
+      padding: 13px 14px;
+      margin-bottom: 14px;
+      color: #5a4300;
+      font-size: 14px;
+      line-height: 1.45;
     }
 
-    .filter-button {
-      border: 1px solid #bad9dc;
-      background: #ffffff;
-      color: var(--cone-teal-dark);
-      border-radius: 999px;
-      padding: 9px 12px;
-      font-size: 13px;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
       font-weight: 700;
-      cursor: pointer;
+      color: var(--cone-text);
+      font-size: 13px;
+      margin-bottom: 7px;
     }
 
-    .filter-button.active {
-      background: var(--cone-teal);
-      color: #ffffff;
-      border-color: var(--cone-teal);
+    .required::after {
+      content: " *";
+      color: var(--cone-danger);
     }
 
-    .search-box {
-      min-width: 280px;
+    input,
+    select,
+    textarea {
+      width: 100%;
       border: 1px solid #c8d7d9;
       border-radius: 12px;
       padding: 11px 12px;
       font-size: 14px;
       color: var(--cone-text);
       background: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .search-box:focus {
+    input:focus,
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: var(--cone-teal);
       box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.14);
     }
 
-    .appointments {
-      display: grid;
-      gap: 12px;
+    textarea {
+      min-height: 90px;
+      resize: vertical;
     }
 
-    .appointment-card {
+    .slot-grid {
       display: grid;
-      grid-template-columns: 1.2fr 0.9fr 0.9fr auto;
-      gap: 14px;
-      align-items: center;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .slot-button {
       border: 1px solid var(--cone-border);
-      border-left: 6px solid var(--cone-teal);
-      border-radius: 16px;
-      padding: 15px;
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
       background: #ffffff;
+      padding: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
     }
 
-    .appointment-card.primary-care {
-      border-left-color: var(--cone-green);
+    .slot-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 94, 102, 0.08);
     }
 
-    .appointment-card.specialty-care {
-      border-left-color: var(--cone-blue);
+    .slot-button.active {
+      border-color: var(--cone-teal);
+      background: #eef8f7;
+      box-shadow: 0 0 0 4px rgba(0, 124, 137, 0.10);
     }
 
-    .appointment-card.needs-action {
-      background: #fffdf5;
-      border-top-color: var(--cone-warning-border);
-      border-right-color: var(--cone-warning-border);
-      border-bottom-color: var(--cone-warning-border);
-    }
-
-    .appointment-main h3 {
-      margin: 0 0 6px;
-      color: var(--cone-text);
-      font-size: 16px;
-    }
-
-    .appointment-main p,
-    .appointment-detail p {
-      margin: 0;
-      color: var(--cone-muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .appointment-detail strong {
+    .slot-button strong {
       display: block;
       color: var(--cone-teal-dark);
-      font-size: 13px;
+      font-size: 14px;
       margin-bottom: 4px;
     }
 
-    .badge-stack {
+    .slot-button span {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .review-list {
       display: grid;
-      justify-items: end;
-      gap: 8px;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .review-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--cone-border);
+      border-left: 5px solid var(--cone-teal);
+      border-radius: 14px;
+      padding: 13px;
+      background: #ffffff;
+    }
+
+    .review-item.success {
+      border-left-color: var(--cone-green);
+    }
+
+    .review-title {
+      font-weight: 700;
+      color: var(--cone-text);
+      margin-bottom: 4px;
+    }
+
+    .review-answer {
+      color: var(--cone-muted);
+      font-size: 13px;
+      line-height: 1.45;
     }
 
     .badge {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      min-width: 138px;
+      min-width: 112px;
       border-radius: 999px;
       padding: 7px 10px;
       font-size: 12px;
@@ -298,35 +359,23 @@
       white-space: nowrap;
     }
 
-    .badge.complete {
-      background: #edf8df;
+    .badge.ready {
+      background: var(--cone-success-soft);
       color: #456d10;
       border: 1px solid #cce8a7;
     }
 
-    .badge.incomplete {
-      background: var(--cone-warning);
-      color: #6a4c00;
-      border: 1px solid var(--cone-warning-border);
-    }
-
-    .badge.specialty {
-      background: #e7f0f5;
+    .badge.info {
+      background: var(--cone-info);
       color: var(--cone-blue);
       border: 1px solid #bad0dd;
     }
 
-    .badge.primary {
-      background: #edf8df;
-      color: #456d10;
-      border: 1px solid #cce8a7;
-    }
-
-    .footer-actions {
+    .actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     button.primary,
@@ -350,33 +399,35 @@
       border: 1px solid #bad9dc;
     }
 
-    .empty-state {
+    .confirmation {
       display: none;
-      padding: 18px;
-      border: 1px dashed #bad9dc;
-      border-radius: 16px;
-      background: #fbfdfd;
-      color: var(--cone-muted);
-      text-align: center;
+      border: 1px solid #cce8a7;
+      background: var(--cone-success-soft);
+      color: #456d10;
+      border-radius: 15px;
+      padding: 14px;
+      margin-top: 14px;
+      line-height: 1.45;
+      font-size: 14px;
       font-weight: 700;
     }
 
+    .note {
+      color: var(--cone-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
     @media (max-width: 980px) {
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .appointment-card {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .badge-stack {
-        justify-items: start;
+      .summary-grid,
+      .layout {
+        grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 680px) {
-      .appointment-page {
+      .scheduling-page {
         padding: 14px;
       }
 
@@ -389,253 +440,358 @@
         text-align: left;
       }
 
-      .summary-grid,
-      .appointment-card {
+      .form-grid,
+      .slot-grid,
+      .review-item {
         grid-template-columns: 1fr;
-      }
-
-      .search-box {
-        min-width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <main class="appointment-page">
-    <header class="top-bar" aria-label="Cone Health pediatric appointments header">
+  <main class="scheduling-page">
+    <header class="top-bar" aria-label="Cone Health specialty scheduling header">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"></div>
         <div>
-          <h1>Cone Health Pediatric Appointments</h1>
-          <p>Genesys Cloud agent view | Upcoming pediatric primary and specialty care</p>
+          <h1>Cone Health Specialty Scheduling</h1>
+          <p>Genesys Cloud agent view | Urology appointment booking</p>
         </div>
       </div>
       <div class="call-status">
-        <div class="pill"><span class="status-dot"></span>Active Patient Call</div>
-        <div>Patient: Sam Law | DOB: 08/08/2017 | MRN: CH-2048176</div>
+        <div class="pill"><span class="status-dot"></span>Ready to Schedule</div>
+        <div>Patient: Allison McCallum | DOB: 01/01/1980 | MRN: CH-5091842</div>
       </div>
     </header>
 
-    <section class="summary-grid" aria-label="Appointment summary">
-      <div class="metric">
-        <span>Total Upcoming Appointments</span>
-        <strong id="totalCount">6</strong>
+    <section class="summary-grid" aria-label="Scheduling summary">
+      <div class="metric success">
+        <span>Scheduling Use Case</span>
+        <strong>Specialty Appointment</strong>
+      </div>
+      <div class="metric info">
+        <span>Selected Specialty</span>
+        <strong id="summarySpecialty">Urology</strong>
       </div>
       <div class="metric">
-        <span>Primary Care</span>
-        <strong>2 scheduled</strong>
+        <span>Insurance</span>
+        <strong id="summaryInsurance">Blue Shield</strong>
       </div>
       <div class="metric">
-        <span>Specialty Care</span>
-        <strong>4 scheduled</strong>
-      </div>
-      <div class="metric">
-        <span>Pre-Registration Needed</span>
-        <strong id="needsRegistrationCount">2 appointments</strong>
+        <span>Booking Status</span>
+        <strong id="summaryBookingStatus">Not Booked</strong>
       </div>
     </section>
 
-    <section class="card" aria-label="Upcoming appointments list">
+    <div class="layout">
+      <section class="card" aria-label="Patient information and specialty selection">
+        <div class="card-header">
+          <h2>Patient Information</h2>
+          <span class="section-tag">Registration</span>
+        </div>
+        <div class="card-body">
+          <div class="script-box">
+            <strong>Agent opening:</strong> Thank you for calling Cone Health, I can help review your information and schedule a specialty appointment.
+          </div>
+
+          <form id="schedulingForm">
+            <div class="form-grid">
+              <div>
+                <label for="firstName" class="required">First Name</label>
+                <input id="firstName" name="firstName" type="text" value="Allison" />
+              </div>
+
+              <div>
+                <label for="lastName" class="required">Last Name</label>
+                <input id="lastName" name="lastName" type="text" value="McCallum" />
+              </div>
+
+              <div>
+                <label for="dob" class="required">Date of Birth</label>
+                <input id="dob" name="dob" type="date" value="1980-01-01" />
+              </div>
+
+              <div>
+                <label for="phone">Primary Phone</label>
+                <input id="phone" name="phone" type="tel" value="000-555-0134" />
+              </div>
+
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" value="allison.mccallum@example.com" />
+              </div>
+
+              <div>
+                <label for="preferredContact">Preferred Contact</label>
+                <select id="preferredContact" name="preferredContact">
+                  <option selected>Phone</option>
+                  <option>Text Message</option>
+                  <option>Email</option>
+                  <option>MyChart Message</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="insurancePlan" class="required">Insurance Plan</label>
+                <select id="insurancePlan" name="insurancePlan">
+                  <option>Aetna</option>
+                  <option selected>Blue Shield</option>
+                  <option>Blue Cross Blue Shield NC</option>
+                  <option>Cigna</option>
+                  <option>Humana</option>
+                  <option>Medicaid</option>
+                  <option>Medicare</option>
+                  <option>United Healthcare</option>
+                  <option>Self Pay</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="specialtyDepartment" class="required">Specialty Department</label>
+                <select id="specialtyDepartment" name="specialtyDepartment">
+                  <option selected>Urology</option>
+                  <option>Cardiology</option>
+                  <option>Oncology</option>
+                  <option>Gastroenterology</option>
+                  <option>Neurology</option>
+                  <option>Orthopedics</option>
+                  <option>Endocrinology</option>
+                  <option>Pulmonology</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="visitReason" class="required">Visit Reason</label>
+                <select id="visitReason" name="visitReason">
+                  <option selected>New patient urology consultation</option>
+                  <option>Follow-up appointment</option>
+                  <option>Procedure follow-up</option>
+                  <option>Referral review</option>
+                  <option>Second opinion</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="appointmentType">Appointment Type</label>
+                <select id="appointmentType" name="appointmentType">
+                  <option selected>In-person visit</option>
+                  <option>Virtual visit</option>
+                  <option>Phone consultation</option>
+                </select>
+              </div>
+
+              <div class="full">
+                <label for="schedulingNotes">Scheduling Notes</label>
+                <textarea id="schedulingNotes" name="schedulingNotes">Patient requesting specialty scheduling for urology. Referral is on file. Confirm preferred date, time, location, and provider availability before booking.</textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Appointment date and time booking">
+        <div class="card-header">
+          <h2>Choose Date & Time</h2>
+          <span class="section-tag">Booking</span>
+        </div>
+        <div class="card-body">
+          <div class="alert">
+            Select an available appointment slot, confirm department and visit reason, then click <strong>Book Appointment</strong>. In production, this action should connect to approved scheduling APIs or Genesys Cloud data actions.
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <label for="preferredLocation">Preferred Location</label>
+              <select id="preferredLocation" name="preferredLocation">
+                <option selected>Cone Health Urology - Greensboro, NC</option>
+                <option>Cone Health Urology - Burlington, NC</option>
+                <option>Cone Health Specialty Care - Greensboro, NC</option>
+                <option>Cone Health Outpatient Center - High Point, NC</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="providerPreference">Provider Preference</label>
+              <select id="providerPreference" name="providerPreference">
+                <option selected>First available provider</option>
+                <option>Female provider preferred</option>
+                <option>Male provider preferred</option>
+                <option>Specific provider requested</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="appointmentDate" class="required">Appointment Date</label>
+              <input id="appointmentDate" name="appointmentDate" type="date" value="2026-06-02" />
+            </div>
+
+            <div>
+              <label for="appointmentTime" class="required">Appointment Time</label>
+              <input id="appointmentTime" name="appointmentTime" type="time" value="09:30" />
+            </div>
+          </div>
+
+          <label style="margin-top: 16px;">Available Urology Slots</label>
+          <div class="slot-grid" aria-label="Available appointment slots">
+            <button class="slot-button active" type="button" data-date="2026-06-02" data-time="09:30" data-label="Tuesday, June 2, 2026 at 9:30 AM">
+              <strong>Tue, Jun 2 · 9:30 AM</strong>
+              <span>Urology consult · Greensboro · First available provider</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-03" data-time="13:15" data-label="Wednesday, June 3, 2026 at 1:15 PM">
+              <strong>Wed, Jun 3 · 1:15 PM</strong>
+              <span>Urology consult · Burlington · First available provider</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-05" data-time="08:45" data-label="Friday, June 5, 2026 at 8:45 AM">
+              <strong>Fri, Jun 5 · 8:45 AM</strong>
+              <span>Urology consult · Greensboro · Morning availability</span>
+            </button>
+            <button class="slot-button" type="button" data-date="2026-06-08" data-time="15:00" data-label="Monday, June 8, 2026 at 3:00 PM">
+              <strong>Mon, Jun 8 · 3:00 PM</strong>
+              <span>Urology consult · High Point · Afternoon availability</span>
+            </button>
+          </div>
+
+          <div class="actions">
+            <button class="primary" type="button" onclick="bookAppointment()">Book Appointment</button>
+            <button class="secondary" type="button" onclick="copyBookingSummary()">Copy Booking Summary</button>
+          </div>
+
+          <div class="confirmation" id="bookingConfirmation">
+            Appointment has not been booked yet.
+          </div>
+
+          <p class="note">Demo page only. Replace sample locations, provider availability, and static patient information with Genesys Cloud script variables and approved scheduling integrations before production use.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" aria-label="Booking review" style="margin-top: 18px;">
       <div class="card-header">
-        <h2>Upcoming Appointments</h2>
-        <span class="section-tag">Schedule Review</span>
+        <h2>Booking Review</h2>
+        <span class="section-tag">Summary</span>
       </div>
       <div class="card-body">
-        <div class="toolbar">
-          <div class="filter-group" aria-label="Appointment filters">
-            <button class="filter-button active" type="button" data-filter="all">All</button>
-            <button class="filter-button" type="button" data-filter="primary-care">Primary Care</button>
-            <button class="filter-button" type="button" data-filter="specialty-care">Specialty Care</button>
-            <button class="filter-button" type="button" data-filter="needs-action">Pre-Reg Needed</button>
-          </div>
-          <input class="search-box" id="appointmentSearch" type="search" placeholder="Search by location, visit type, or city" aria-label="Search appointments" />
-        </div>
-
-        <div class="appointments" id="appointmentsList">
-          <article class="appointment-card primary-care" data-type="primary-care" data-status="complete" data-search="well child visit cone health piedmont pediatrics greensboro primary care">
-            <div class="appointment-main">
-              <h3>Well Child Visit</h3>
-              <p>Pediatric primary care visit for growth, development, school forms, and immunization review.</p>
+        <ul class="review-list">
+          <li class="review-item success">
+            <div>
+              <div class="review-title">Patient Verified</div>
+              <div class="review-answer">Allison McCallum, DOB 01/01/1980, primary phone 000-555-0134.</div>
             </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Tuesday, May 19, 2026<br />9:30 AM</p>
+            <span class="badge ready">Ready</span>
+          </li>
+          <li class="review-item success">
+            <div>
+              <div class="review-title">Insurance Verified</div>
+              <div class="review-answer" id="insuranceReviewText">Blue Shield selected for scheduling and eligibility review.</div>
             </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Cone Health Piedmont Pediatrics<br />Greensboro, NC</p>
+            <span class="badge ready">Selected</span>
+          </li>
+          <li class="review-item">
+            <div>
+              <div class="review-title">Selected Appointment</div>
+              <div class="review-answer" id="selectedAppointmentText">Tuesday, June 2, 2026 at 9:30 AM · Urology · Cone Health Urology - Greensboro, NC.</div>
             </div>
-            <div class="badge-stack">
-              <span class="badge primary">Primary Care</span>
-              <span class="badge complete">Pre-Reg Complete</span>
-            </div>
-          </article>
-
-          <article class="appointment-card specialty-care needs-action" data-type="specialty-care" data-status="incomplete" data-search="pediatric endocrinology cone health pediatric specialists at wendover avenue greensboro specialty care">
-            <div class="appointment-main">
-              <h3>Pediatric Endocrinology Follow-up</h3>
-              <p>Specialty visit to review growth trends, lab results, medication questions, and care plan updates.</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Friday, May 29, 2026<br />2:15 PM</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Cone Health Pediatric Specialists at Wendover Avenue<br />Greensboro, NC</p>
-            </div>
-            <div class="badge-stack">
-              <span class="badge specialty">Specialty Care</span>
-              <span class="badge incomplete">Pre-Reg Needed</span>
-            </div>
-          </article>
-
-          <article class="appointment-card specialty-care" data-type="specialty-care" data-status="complete" data-search="pediatric neurology cone health pediatric specialists at church street greensboro specialty care">
-            <div class="appointment-main">
-              <h3>Pediatric Neurology Consultation</h3>
-              <p>New patient specialty consultation for headaches, neurological history, and recommended next steps.</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Wednesday, June 10, 2026<br />10:45 AM</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Cone Health Pediatric Specialists at Church Street<br />Greensboro, NC</p>
-            </div>
-            <div class="badge-stack">
-              <span class="badge specialty">Specialty Care</span>
-              <span class="badge complete">Pre-Reg Complete</span>
-            </div>
-          </article>
-
-          <article class="appointment-card primary-care needs-action" data-type="primary-care" data-status="incomplete" data-search="sick visit burlington pediatrics burlington north carolina primary care">
-            <div class="appointment-main">
-              <h3>Pediatric Sick Visit</h3>
-              <p>Primary care appointment for cough, congestion, fever screening, and return-to-school guidance.</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Monday, June 15, 2026<br />8:20 AM</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Burlington Pediatrics, PA<br />Burlington, NC</p>
-            </div>
-            <div class="badge-stack">
-              <span class="badge primary">Primary Care</span>
-              <span class="badge incomplete">Pre-Reg Needed</span>
-            </div>
-          </article>
-
-          <article class="appointment-card specialty-care" data-type="specialty-care" data-status="complete" data-search="developmental behavioral pediatrics cone health pediatric specialists at burlington specialty care">
-            <div class="appointment-main">
-              <h3>Developmental & Behavioral Pediatrics</h3>
-              <p>Specialty follow-up for school supports, behavioral health coordination, and family care planning.</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Thursday, June 25, 2026<br />1:00 PM</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Cone Health Pediatric Specialists at Burlington<br />Burlington, NC</p>
-            </div>
-            <div class="badge-stack">
-              <span class="badge specialty">Specialty Care</span>
-              <span class="badge complete">Pre-Reg Complete</span>
-            </div>
-          </article>
-
-          <article class="appointment-card specialty-care" data-type="specialty-care" data-status="complete" data-search="pediatric surgery cone health pediatric specialists at church street greensboro specialty care">
-            <div class="appointment-main">
-              <h3>Pediatric Surgery Follow-up</h3>
-              <p>Post-consultation specialty follow-up to review healing, activity restrictions, and next care steps.</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Date & Time</strong>
-              <p>Tuesday, July 07, 2026<br />11:15 AM</p>
-            </div>
-            <div class="appointment-detail">
-              <strong>Location</strong>
-              <p>Cone Health Pediatric Specialists at Church Street<br />Greensboro, NC</p>
-            </div>
-            <div class="badge-stack">
-              <span class="badge specialty">Specialty Care</span>
-              <span class="badge complete">Pre-Reg Complete</span>
-            </div>
-          </article>
-        </div>
-
-        <div class="empty-state" id="emptyState">No appointments match the selected filter or search.</div>
-
-        <div class="footer-actions">
-          <button class="primary" type="button" onclick="printAppointments()">Print Appointment List</button>
-          <button class="secondary" type="button" onclick="copyAppointmentSummary()">Copy Appointment Summary</button>
-        </div>
+            <span class="badge info" id="bookingBadge">Pending</span>
+          </li>
+        </ul>
       </div>
     </section>
   </main>
 
   <script>
-    const filterButtons = document.querySelectorAll('.filter-button');
-    const searchInput = document.getElementById('appointmentSearch');
-    const appointments = document.querySelectorAll('.appointment-card');
-    const emptyState = document.getElementById('emptyState');
-    let activeFilter = 'all';
+    const specialtyDepartment = document.getElementById('specialtyDepartment');
+    const summarySpecialty = document.getElementById('summarySpecialty');
+    const insurancePlan = document.getElementById('insurancePlan');
+    const summaryInsurance = document.getElementById('summaryInsurance');
+    const insuranceReviewText = document.getElementById('insuranceReviewText');
+    const slotButtons = document.querySelectorAll('.slot-button');
+    const appointmentDate = document.getElementById('appointmentDate');
+    const appointmentTime = document.getElementById('appointmentTime');
+    const selectedAppointmentText = document.getElementById('selectedAppointmentText');
+    const bookingConfirmation = document.getElementById('bookingConfirmation');
+    const bookingBadge = document.getElementById('bookingBadge');
+    const summaryBookingStatus = document.getElementById('summaryBookingStatus');
 
-    filterButtons.forEach((button) => {
+    specialtyDepartment.addEventListener('change', () => {
+      summarySpecialty.innerText = specialtyDepartment.value;
+      updateSelectedAppointmentText();
+    });
+
+    insurancePlan.addEventListener('change', () => {
+      summaryInsurance.innerText = insurancePlan.value;
+      insuranceReviewText.innerText = `${insurancePlan.value} selected for scheduling and eligibility review.`;
+    });
+
+    document.getElementById('preferredLocation').addEventListener('change', updateSelectedAppointmentText);
+    appointmentDate.addEventListener('change', updateSelectedAppointmentText);
+    appointmentTime.addEventListener('change', updateSelectedAppointmentText);
+
+    slotButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        activeFilter = button.getAttribute('data-filter');
-        filterButtons.forEach((item) => item.classList.remove('active'));
+        slotButtons.forEach((slot) => slot.classList.remove('active'));
         button.classList.add('active');
-        filterAppointments();
+        appointmentDate.value = button.getAttribute('data-date');
+        appointmentTime.value = button.getAttribute('data-time');
+        selectedAppointmentText.innerText = `${button.getAttribute('data-label')} · ${specialtyDepartment.value} · ${document.getElementById('preferredLocation').value}.`;
+        bookingBadge.innerText = 'Pending';
+        bookingBadge.className = 'badge info';
+        summaryBookingStatus.innerText = 'Not Booked';
+        bookingConfirmation.style.display = 'none';
       });
     });
 
-    searchInput.addEventListener('input', filterAppointments);
-
-    function filterAppointments() {
-      const term = searchInput.value.trim().toLowerCase();
-      let visibleCount = 0;
-
-      appointments.forEach((appointment) => {
-        const type = appointment.getAttribute('data-type');
-        const status = appointment.getAttribute('data-status');
-        const searchableText = appointment.getAttribute('data-search');
-        const matchesFilter = activeFilter === 'all' || activeFilter === type || (activeFilter === 'needs-action' && status === 'incomplete');
-        const matchesSearch = !term || searchableText.includes(term);
-
-        if (matchesFilter && matchesSearch) {
-          appointment.style.display = 'grid';
-          visibleCount += 1;
-        } else {
-          appointment.style.display = 'none';
-        }
-      });
-
-      emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
-      document.getElementById('totalCount').innerText = visibleCount;
+    function updateSelectedAppointmentText() {
+      const formattedDate = appointmentDate.value || 'No date selected';
+      const formattedTime = appointmentTime.value || 'No time selected';
+      selectedAppointmentText.innerText = `${formattedDate} at ${formattedTime} · ${specialtyDepartment.value} · ${document.getElementById('preferredLocation').value}.`;
+      bookingBadge.innerText = 'Pending';
+      bookingBadge.className = 'badge info';
+      summaryBookingStatus.innerText = 'Not Booked';
+      bookingConfirmation.style.display = 'none';
     }
 
-    function printAppointments() {
-      window.print();
+    function bookAppointment() {
+      const patientName = `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`;
+      const specialty = specialtyDepartment.value;
+      const location = document.getElementById('preferredLocation').value;
+      const date = appointmentDate.value;
+      const time = appointmentTime.value;
+
+      if (!date || !time || !specialty) {
+        alert('Please select a specialty department, appointment date, and appointment time before booking.');
+        return;
+      }
+
+      const confirmationText = `${patientName} is booked for ${specialty} on ${date} at ${time} at ${location}.`;
+      bookingConfirmation.innerText = confirmationText;
+      bookingConfirmation.style.display = 'block';
+      bookingBadge.innerText = 'Booked';
+      bookingBadge.className = 'badge ready';
+      summaryBookingStatus.innerText = 'Booked';
     }
 
-    async function copyAppointmentSummary() {
-      const visibleAppointments = Array.from(appointments).filter((appointment) => appointment.style.display !== 'none');
-      const summary = visibleAppointments.map((appointment) => {
-        const title = appointment.querySelector('h3').innerText;
-        const details = Array.from(appointment.querySelectorAll('.appointment-detail p')).map((item) => item.innerText.replace(/\n/g, ' - '));
-        const badges = Array.from(appointment.querySelectorAll('.badge')).map((badge) => badge.innerText).join(', ');
-        return `${title}: ${details.join(' | ')} | ${badges}`;
-      }).join('\n');
+    async function copyBookingSummary() {
+      const summary = [
+        'Specialty Scheduling Booking Summary',
+        `Patient: ${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+        'DOB: 01/01/1980',
+        `Specialty: ${specialtyDepartment.value}`,
+        `Insurance: ${insurancePlan.value}`,
+        `Visit reason: ${document.getElementById('visitReason').value}`,
+        `Appointment type: ${document.getElementById('appointmentType').value}`,
+        `Location: ${document.getElementById('preferredLocation').value}`,
+        `Provider preference: ${document.getElementById('providerPreference').value}`,
+        `Date: ${appointmentDate.value}`,
+        `Time: ${appointmentTime.value}`,
+        `Booking status: ${summaryBookingStatus.innerText}`,
+        `Notes: ${document.getElementById('schedulingNotes').value.trim() || 'None entered'}`
+      ].join('\n');
 
       try {
         await navigator.clipboard.writeText(summary);
-        alert('Appointment summary copied.');
+        alert('Booking summary copied.');
       } catch (error) {
-        alert('Copy failed. Please select and copy the appointment details manually.');
+        alert('Copy failed. Please select and copy the booking details manually.');
       }
     }
   </script>
